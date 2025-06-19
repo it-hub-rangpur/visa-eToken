@@ -1,4 +1,4 @@
-import catchAsync from "@/utils/helpers/catchAsync";
+import { catchAsync } from "@/utils/helpers/catchAsync";
 import sendResponse from "@/utils/helpers/sendResponse";
 import httpStatus from "http-status";
 import { NextResponse } from "next/server";
