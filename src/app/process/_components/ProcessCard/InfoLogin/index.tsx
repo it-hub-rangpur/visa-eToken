@@ -1,7 +1,10 @@
 "use client";
+import { getCenter, getVisaType } from "@/constans";
+import { IProcessResponse } from "@/interfaces";
 import {
   useAbortCallMutation,
   useCreateSessionMutation,
+  useLoginMutation,
 } from "@/lib/apis/Application/ApplicationApi";
 import { IApplication } from "@/lib/apis/Application/ApplicationSlice";
 import { Box, Button, Stack, Typography } from "@mui/material";
@@ -9,56 +12,149 @@ import React from "react";
 
 interface IProps {
   data: IApplication;
+  applicationState: IProcessResponse;
+  setApplicationState: React.Dispatch<React.SetStateAction<IProcessResponse>>;
 }
 
-const InfoLogin: React.FC<IProps> = ({ data }) => {
+const InfoLogin: React.FC<IProps> = ({
+  data,
+  setApplicationState,
+  applicationState,
+}) => {
   const [createSession, { isLoading: sessionCreateLoading }] =
     useCreateSessionMutation();
-
+  const [login, { isLoading: loginLoading }] = useLoginMutation();
   const [abortCall, { isLoading: abortCallLoading }] = useAbortCallMutation();
+  const createSessionRef = React.useRef<HTMLButtonElement>(null);
 
   const handleCreateSession = async () => {
     const info = {
       _id: data?._id,
+      _token: applicationState?._token,
+      action: "/",
+      state: applicationState?.cookies,
     };
-    // handleAbort();
+
     try {
-      const response = await createSession(info).unwrap();
-      console.log(response);
+      const response = (await createSession({
+        info,
+      }).unwrap()) as {
+        success: boolean;
+        data: IProcessResponse;
+      };
+
+      if (response?.success) {
+        const info = {
+          _id: data?._id,
+          ...response?.data,
+        };
+        localStorage.setItem(data?._id, JSON.stringify(info));
+        setApplicationState(info);
+      }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
-    console.log("click", info);
+  };
+
+  const handleCreateNewSession = async () => {
+    const info = {
+      _id: data?._id,
+      _token: "",
+      action: "/",
+      state: [],
+    };
+
+    try {
+      const response = (await createSession({
+        info,
+      }).unwrap()) as {
+        success: boolean;
+        data: IProcessResponse;
+      };
+
+      if (response?.success) {
+        const info = {
+          _id: data?._id,
+          ...response?.data,
+        };
+        localStorage.setItem(data?._id, JSON.stringify(info));
+        setApplicationState(info);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleLogin = async () => {
+    const info = {
+      _id: data?._id,
+      _token: applicationState?._token,
+      action: "login",
+      state: applicationState?.cookies,
+    };
+
+    try {
+      const response = (await login({
+        info,
+      }).unwrap()) as {
+        success: boolean;
+        data: IProcessResponse;
+      };
+
+      if (response?.success) {
+        const info = {
+          ...response?.data,
+          _id: data?._id,
+          _token: applicationState?._token,
+        };
+        localStorage.setItem(data?._id, JSON.stringify(info));
+        setApplicationState(info);
+        if (response?.data?.path === "/") {
+          setTimeout(async () => {
+            if (createSessionRef?.current) {
+              createSessionRef?.current?.click();
+            }
+          }, 500);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleAbort = async () => {
     const info = {
       _id: data?._id,
+      action: "abort",
     };
 
     try {
-      const response = await abortCall(info).unwrap();
-      console.log(response);
+      await abortCall(info).unwrap();
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
-    console.log("click", info);
   };
+
+  const medInfo = data?.info[0];
 
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between" }}>
       <Box>
         <Typography sx={{ fontSize: "12px", fontWeight: "bold" }}>
-          Mission: Dhaka, Medical - 2
+          Mission: {getCenter(data?.center)}, {getVisaType(data?.visaType)} -{" "}
+          {data?.info?.length}
         </Typography>
         <Typography sx={{ fontSize: "12px", fontWeight: "bold" }}>
-          Med: BGDRV0A1BE25, MD HADI AL HAMZA
+          Med: {medInfo?.web_id},{" "}
+          {medInfo?.name?.length > 10
+            ? medInfo?.name.slice(0, 10) + ".."
+            : medInfo?.name}
         </Typography>
         <Typography sx={{ fontSize: "12px", fontWeight: "bold" }}>
-          Mobile: 01719971636
+          Mobile: {data?.phone}
         </Typography>
         <Typography sx={{ fontSize: "12px", fontWeight: "bold" }}>
-          Email: hadialhamja@gmail.com
+          Email: {data?.email?.split("@")[0] + ".."}
         </Typography>
       </Box>
 
@@ -72,20 +168,69 @@ const InfoLogin: React.FC<IProps> = ({ data }) => {
       >
         <Stack direction="row" spacing={1}>
           <Button
+            ref={createSessionRef}
             disabled={sessionCreateLoading}
             onClick={handleCreateSession}
-            sx={{ fontSize: "10px", textTransform: "none" }}
+            sx={{ fontSize: "10px", textTransform: "none", width: "100%" }}
             size="small"
             variant="contained"
           >
-            {sessionCreateLoading ? "Creating Session..." : "Create Session"}
+            {sessionCreateLoading ? "Creating..." : "Session"}
           </Button>
+
+          <Button
+            disabled={
+              sessionCreateLoading ||
+              !applicationState?._token ||
+              !applicationState?.isLoggedin
+            }
+            onClick={handleCreateNewSession}
+            color="error"
+            sx={{ fontSize: "10px", textTransform: "none", width: "100%" }}
+            size="small"
+            variant="contained"
+          >
+            {sessionCreateLoading ? "Outing..." : "Logout"}
+          </Button>
+        </Stack>
+
+        {applicationState?.isLoggedin && (
+          <Box sx={{ marginTop: "5px" }}>
+            <Typography
+              sx={{
+                bgcolor: "#000",
+                textAlign: "center",
+                paddingY: "5px",
+                borderRadius: "4px",
+                color: "#FFF",
+                fontWeight: 600,
+                fontSize: "12px",
+              }}
+            >
+              Application Login!
+            </Typography>
+          </Box>
+        )}
+
+        <Stack direction="row" spacing={1} marginTop={"5px"}>
+          {!applicationState?.isLoggedin && (
+            <Button
+              disabled={!applicationState?._token || loginLoading}
+              onClick={handleLogin}
+              sx={{ fontSize: "10px", textTransform: "none", width: "100%" }}
+              size="small"
+              variant="contained"
+            >
+              {loginLoading ? "Logging In..." : "Login"}
+            </Button>
+          )}
+
           <Button
             disabled={abortCallLoading}
             onClick={handleAbort}
             color="error"
-            sx={{ fontSize: "10px", textTransform: "none" }}
-            size="small"
+            sx={{ fontSize: "10px", textTransform: "none", width: "100%" }}
+            size={applicationState?.isLoggedin ? "medium" : "small"}
             variant="contained"
           >
             {abortCallLoading ? "Aborting..." : "Abort"}

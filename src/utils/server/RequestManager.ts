@@ -1,5 +1,24 @@
 import { Agent, fetch } from "undici";
 import ApiError from "../ErrorHandelars/ApiError";
+import { IPayload } from "@/interfaces";
+
+export function createHeaders(state: string[]): Headers {
+  const headers = new Headers();
+  headers.set("accept-language", "en-US,en;q=0.9");
+  headers.set("Accept", "application/x-www-form-urlencoded;charset=UTF-8");
+  headers.set(
+    "Content-Type",
+    "application/x-www-form-urlencoded;charset=UTF-8"
+  );
+
+  if (state?.length) {
+    const cookies = state.join("; ");
+    if (cookies) headers.set("Cookie", cookies);
+  }
+  return headers;
+}
+
+const url = "https://payment.ivacbd.com";
 
 const httpsAgent = new Agent({
   keepAliveTimeout: 300000,
@@ -20,13 +39,16 @@ const requestMap = new Map<string, RequestState>();
 // Status codes that should trigger a retry
 const RETRY_STATUS_CODES = [500, 502, 504];
 const ERROR_STATUS_CODES = [429];
+const SUCCESS_STATUS_CODES = [200, 301, 302];
 
 export async function raceRequests(
-  url: string,
-  applicationId: string,
-  concurrency: number = 5,
+  payload: IPayload,
+  concurrency: number = 1,
   maxDelayMs: number = 9
 ) {
+  const { _id, action, cookies, method, info } = payload;
+  const headers = createHeaders(cookies);
+
   const controllers = Array.from(
     { length: concurrency },
     () => new AbortController()
@@ -34,19 +56,16 @@ export async function raceRequests(
   const timeouts: NodeJS.Timeout[] = [];
 
   return new Promise((resolve, reject) => {
-    // Initialize state with optional reject function
-    requestMap.set(applicationId, {
+    requestMap.set(_id, {
       isCompleted: false,
       controllers,
       timeouts,
       reject,
     });
-
     let hasSuccess = false;
     let completedCount = 0;
-
     const cleanup = (completed: boolean) => {
-      const tracker = requestMap.get(applicationId);
+      const tracker = requestMap.get(_id);
       if (tracker) {
         tracker.isCompleted = completed;
         timeouts.forEach((timeout) => clearTimeout(timeout));
@@ -55,11 +74,10 @@ export async function raceRequests(
           delete tracker.reject;
         }
         if (completed) {
-          requestMap.delete(applicationId);
+          requestMap.delete(_id);
         }
       }
     };
-
     const makeRequestWithRetry = async (
       controller: AbortController,
       attempt = 0
@@ -67,12 +85,18 @@ export async function raceRequests(
       if (hasSuccess || controller.signal.aborted) {
         return null;
       }
-      const response = await fetch(url, {
+
+      const response = await fetch(url + action, {
         dispatcher: httpsAgent,
-        signal: controller.signal,
+        method,
+        headers,
+        body:
+          method !== "GET"
+            ? new URLSearchParams(info as Record<string, string>)
+            : undefined,
+        redirect: "manual",
       });
 
-      // Check if we should retry
       if (RETRY_STATUS_CODES.includes(response.status)) {
         console.log(
           `Retrying request (attempt ${attempt + 1}) for status ${
@@ -85,7 +109,6 @@ export async function raceRequests(
       }
       return response;
     };
-
     controllers.forEach((controller, i) => {
       const delay = i === 0 ? 0 : Math.floor(Math.random() * maxDelayMs);
       const timeout = setTimeout(async () => {
@@ -96,7 +119,10 @@ export async function raceRequests(
         }
         try {
           const response = await makeRequestWithRetry(controller);
-          if (response?.ok && !hasSuccess) {
+          if (
+            SUCCESS_STATUS_CODES?.includes(response?.status as number) &&
+            !hasSuccess
+          ) {
             hasSuccess = true;
             cleanup(true);
             resolve(response);
@@ -112,10 +138,8 @@ export async function raceRequests(
           checkCompletion();
         }
       }, delay);
-
       timeouts.push(timeout);
     });
-
     const checkCompletion = () => {
       if (!hasSuccess && completedCount === concurrency) {
         cleanup(true);
@@ -125,7 +149,7 @@ export async function raceRequests(
   });
 }
 
-export function abortRequests(applicationId: string): boolean {
+export async function abortRequests(applicationId: string) {
   const tracker = requestMap.get(applicationId);
   if (tracker && !tracker.isCompleted) {
     console.log(`Aborting requests for application: ${applicationId}`);
@@ -142,7 +166,5 @@ export function abortRequests(applicationId: string): boolean {
     requestMap.delete(applicationId);
     return true;
   }
-
   console.log(`No active requests found for application: ${applicationId}`);
-  return false;
 }

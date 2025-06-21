@@ -1,10 +1,11 @@
 "use server";
 
 import { IPayload, IProcessRequest } from "@/interfaces";
-import { CreateSession } from "@/server/ApplicationService";
+import { DoLogin } from "@/server/ApplicationService";
 import { getById } from "@/server/ServerServices";
 import { catchAsync } from "@/utils/helpers/catchAsync";
 import sendResponse from "@/utils/helpers/sendResponse";
+import { getWithoutOtpPayload } from "@/utils/payloads";
 import httpStatus from "http-status";
 import { NextResponse } from "next/server";
 
@@ -22,19 +23,23 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
     });
   }
 
+  const info = getWithoutOtpPayload(data._token, application);
+
   const payload = {
     _token: data?._token,
     _id: data._id,
-    action: "/",
-    method: "GET",
+    action: "/dologin",
+    method: "POST",
     cookies: data?.state,
+    info,
   };
 
-  const response = await CreateSession(payload as IPayload);
+  const response = await DoLogin(payload as IPayload);
+
   return sendResponse({
     statusCode: httpStatus.OK,
     success: true,
-    message: "Session Created Successfully!",
+    message: "Login Successfully!",
     data: response,
   });
 });

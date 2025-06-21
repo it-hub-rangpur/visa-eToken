@@ -1,3 +1,5 @@
+import { createSlice } from "@reduxjs/toolkit";
+
 export interface IPaymentStatus {
   order_id: string;
   token_no: string;
@@ -39,3 +41,18 @@ export interface IApplication {
   status: boolean;
   serverInfo: IServerInfo;
 }
+
+const applicationSlice = createSlice({
+  name: "applications",
+  initialState: {
+    application: null,
+  },
+  reducers: {
+    setApplication: (state, action) => {
+      state.application = action.payload;
+    },
+  },
+});
+
+export const { setApplication } = applicationSlice.actions;
+export default applicationSlice.reducer;

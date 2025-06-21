@@ -34,6 +34,48 @@
       "lastLogin": "2025-06-17T07:25:52.037Z"
     }
   },
+
+  {
+    "_id": "684e947edd357d61354f9a3d",
+    "center": 1,
+    "ivac": 17,
+    "visaType": 13,
+    "phone": "01735418440",
+    "email": "MITUSARKER1979@GMAIL.COM",
+    "password": "01735418440",
+    "info": [
+      {
+        "name": "MRINAL KANTI SARKER",
+        "web_id": "BGDDV4569325",
+        "_id": "684e947edd357d61354f9a3e"
+      },
+      {
+        "name": "JAGODISH CHANDRO ROY",
+        "web_id": "BGDDV456BE25",
+        "_id": "684e947edd357d61354f9a3f"
+      }
+    ],
+    "visit_purpose": "medical treatment",
+    "hash_params": "",
+    "selected_payment": {
+      "name": "VISA",
+      "slug": "visacard",
+      "link": "https://securepay.sslcommerz.com/gwprocess/v4/image/gw1/visa.png"
+    },
+    "createdAt": "2025-06-15T09:38:06.376Z",
+    "slot_dates": ["2025-06-23"],
+    "paymentStatus": {
+      "status": "",
+      "url": "",
+      "order_id": "",
+      "token_no": ""
+    },
+    "status": false,
+    "serverInfo": {
+      "lastLogin": "2025-06-21T19:02:36.791Z"
+    }
+  },
+
   {
     "_id": "685021dfdd357d61354f9eb5",
     "center": 3,

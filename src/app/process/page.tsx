@@ -1,8 +1,9 @@
 import { Box, Grid } from "@mui/material";
 import React from "react";
-import ProcessCard from "./_components/ProcessCard";
 import { IApplication } from "@/lib/apis/Application/ApplicationSlice";
+import dynamic from "next/dynamic";
 
+const ProcessCard = dynamic(() => import("./_components/ProcessCard"));
 const getProcessApplication = async (): Promise<IApplication[]> => {
   try {
     // Use relative URL
@@ -21,7 +22,7 @@ const getProcessApplication = async (): Promise<IApplication[]> => {
     const data = await res.json();
     return data?.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return [];
   }
 };

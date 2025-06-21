@@ -1,13 +1,16 @@
 const center: { [key: number]: string } = {
+  1: "Dhaka",
   3: "Rajshahi",
 };
 
 const ivac: { [key: number]: string } = {
   2: "IVAC, Rajshahi",
+  17: "IVAC, Dhaka",
 };
 
 const visaType: { [key: number]: string } = {
-  6: "Medical",
+  13: "Medical",
+  6: "Entry",
 };
 
 export const getCenter = (id: number): string => {

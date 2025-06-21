@@ -3,13 +3,12 @@ import baseApiSlice from "../BaseApiSlice";
 const ApplicationApi = baseApiSlice.injectEndpoints({
   endpoints: (builder) => ({
     createSession: builder.mutation({
-      query: (data) => ({
+      query: ({ info }) => ({
         url: `/create-session`,
         method: "POST",
         contentType: "application/json",
-        body: data,
+        body: info,
       }),
-      //   invalidatesTags: ["user"],
     }),
 
     abortCall: builder.mutation({
@@ -19,48 +18,21 @@ const ApplicationApi = baseApiSlice.injectEndpoints({
         contentType: "application/json",
         body: data,
       }),
-      //   invalidatesTags: ["user"],
     }),
 
-    // generateOtp: builder.mutation({
-    //   query: ({ params, ...data }) => ({
-    //     url: `/generateOtp`,
-    //     method: "POST",
-    //     contentType: "multipart/form-data",
-    //     data,
-    //     params,
-    //   }),
-    //   invalidatesTags: ["user"],
-    // }),
-
-    // validateOtp: builder.mutation({
-    //   query: (data) => ({
-    //     url: `/ValidateOtp`,
-    //     method: "POST",
-    //     contentType: "multipart/form-data",
-    //     data,
-    //   }),
-    //   invalidatesTags: ["user"],
-    // }),
-
-    // updateUserName: builder.mutation({
-    //   query: ({ data, id }) => ({
-    //     url: `/userProfile/${id}`,
-    //     method: "PUT",
-    //     contentType: "multipart/form-data",
-    //     data,
-    //   }),
-    //   invalidatesTags: ["user"],
-    // }),
-    // loginWithMagicLink: builder.query({
-    //   query: (token) => ({
-    //     url: `/validateMagicLink/${token}`,
-    //     method: "GET",
-    //   }),
-    //   providesTags: ["user"],
-    // }),
+    login: builder.mutation({
+      query: ({ info }) => ({
+        url: `/login`,
+        method: "POST",
+        contentType: "application/json",
+        body: info,
+      }),
+    }),
   }),
 });
 
-export const { useCreateSessionMutation, useAbortCallMutation } =
-  ApplicationApi;
+export const {
+  useCreateSessionMutation,
+  useAbortCallMutation,
+  useLoginMutation,
+} = ApplicationApi;
