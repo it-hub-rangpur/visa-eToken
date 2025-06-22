@@ -1,13 +1,11 @@
 "use server";
 
 import { IPayload, IProcessRequest } from "@/interfaces";
-import { DoLogin } from "@/server/ApplicationService";
+import { PaymentOTP } from "@/server/ApplicationService";
 import { getById } from "@/server/ServerServices";
-import ApiError from "@/utils/ErrorHandelars/ApiError";
 import { catchAsync } from "@/utils/helpers/catchAsync";
 import sendResponse from "@/utils/helpers/sendResponse";
-import { getWithoutOtpPayload } from "@/utils/payloads";
-import { getCurrentSession, SessionStep } from "@/utils/server/sessionWithStep";
+import { paymentOtpPayload } from "@/utils/payloads";
 import httpStatus from "http-status";
 import { NextResponse } from "next/server";
 
@@ -25,29 +23,22 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
     });
   }
 
-  const currentSession = getCurrentSession(data?.action as SessionStep);
-
-  if (!currentSession) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Session Not Found!");
-  }
-
-  const info = getWithoutOtpPayload(data._token, application);
+  const info = paymentOtpPayload(data._token, data?.resend as number);
 
   const payload = {
-    _token: data?._token,
     _id: data._id,
-    action: "/dologin",
+    action: "/pay-otp-sent",
     method: "POST",
     cookies: data?.state,
     info,
   };
 
-  const response = await DoLogin(payload as IPayload);
+  const response = await PaymentOTP(payload as IPayload);
 
   return sendResponse({
     statusCode: httpStatus.OK,
-    success: true,
-    message: "Login Successfully!",
+    success: response?.resend > (data?.resend as number),
+    message: response?.message,
     data: response,
   });
 });

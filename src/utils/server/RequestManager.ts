@@ -50,7 +50,7 @@ export async function raceRequests(
   const headers = createHeaders(cookies);
 
   const controllers = Array.from(
-    { length: concurrency },
+    { length: action === "/pay-otp-sent" ? 1 : concurrency },
     () => new AbortController()
   );
   const timeouts: NodeJS.Timeout[] = [];
@@ -95,7 +95,10 @@ export async function raceRequests(
             ? new URLSearchParams(info as Record<string, string>)
             : undefined,
         redirect: "manual",
+        signal: controller.signal,
       });
+
+      console.log(response?.status, "-", response?.statusText);
 
       if (RETRY_STATUS_CODES.includes(response.status)) {
         console.log(
@@ -135,7 +138,7 @@ export async function raceRequests(
           console.error(`Request ${i} failed after retries:`, error);
         } finally {
           completedCount++;
-          checkCompletion();
+          // checkCompletion();
         }
       }, delay);
       timeouts.push(timeout);

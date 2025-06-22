@@ -3,6 +3,11 @@ export interface IProcessRequest {
   _token: string;
   action: string;
   state: string[];
+  resend?: number;
+  otp?: string;
+  date?: string;
+  time?: number;
+  hashParam?: string;
 }
 
 export interface IProcessResponse {
@@ -12,6 +17,7 @@ export interface IProcessResponse {
   isLoggedin: boolean;
   path?: string;
   cookies: string[];
+  resend?: number;
 }
 
 export interface IPayload {
@@ -19,5 +25,5 @@ export interface IPayload {
   cookies: string[];
   action?: string;
   method?: string;
-  info?: unknown;
+  info?: { [key: string]: string | number };
 }

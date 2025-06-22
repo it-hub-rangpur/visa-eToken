@@ -1,9 +1,8 @@
-import { Box, Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import React from "react";
 import { IApplication } from "@/lib/apis/Application/ApplicationSlice";
-import dynamic from "next/dynamic";
+import Onprogress from "./_components/Onprogress";
 
-const ProcessCard = dynamic(() => import("./_components/ProcessCard"));
 const getProcessApplication = async (): Promise<IApplication[]> => {
   try {
     // Use relative URL
@@ -32,13 +31,7 @@ const ProcessPage = async () => {
 
   return (
     <Box sx={{ padding: "1rem" }}>
-      <Grid container spacing={2}>
-        {data?.map((item, index) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
-            <ProcessCard data={item} />
-          </Grid>
-        ))}
-      </Grid>
+      <Onprogress data={data} />
     </Box>
   );
 };

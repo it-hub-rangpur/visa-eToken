@@ -1,12 +1,12 @@
 "use server";
 
 import { IPayload, IProcessRequest } from "@/interfaces";
-import { DoLogin } from "@/server/ApplicationService";
+import { BookNow } from "@/server/ApplicationService";
 import { getById } from "@/server/ServerServices";
 import ApiError from "@/utils/ErrorHandelars/ApiError";
 import { catchAsync } from "@/utils/helpers/catchAsync";
 import sendResponse from "@/utils/helpers/sendResponse";
-import { getWithoutOtpPayload } from "@/utils/payloads";
+import { getBookSlotPayload } from "@/utils/payloads";
 import { getCurrentSession, SessionStep } from "@/utils/server/sessionWithStep";
 import httpStatus from "http-status";
 import { NextResponse } from "next/server";
@@ -27,27 +27,30 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
 
   const currentSession = getCurrentSession(data?.action as SessionStep);
 
-  if (!currentSession) {
+  if (currentSession <= 0) {
     throw new ApiError(httpStatus.NOT_FOUND, "Session Not Found!");
   }
 
-  const info = getWithoutOtpPayload(data._token, application);
+  const info = getBookSlotPayload(
+    data._token,
+    data?.date as string,
+    data?.time as number,
+    data?.hashParam as string
+  );
 
   const payload = {
-    _token: data?._token,
     _id: data._id,
-    action: "/dologin",
+    action: "/paynow",
     method: "POST",
     cookies: data?.state,
     info,
   };
 
-  const response = await DoLogin(payload as IPayload);
-
+  const response = await BookNow(payload as IPayload);
   return sendResponse({
     statusCode: httpStatus.OK,
     success: true,
-    message: "Login Successfully!",
+    message: "Slot Booked!",
     data: response,
   });
 });

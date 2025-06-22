@@ -14,12 +14,14 @@ interface IProps {
   data: IApplication;
   applicationState: IProcessResponse;
   setApplicationState: React.Dispatch<React.SetStateAction<IProcessResponse>>;
+  setDisplayMessage: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const InfoLogin: React.FC<IProps> = ({
   data,
   setApplicationState,
   applicationState,
+  setDisplayMessage,
 }) => {
   const [createSession, { isLoading: sessionCreateLoading }] =
     useCreateSessionMutation();
@@ -28,10 +30,11 @@ const InfoLogin: React.FC<IProps> = ({
   const createSessionRef = React.useRef<HTMLButtonElement>(null);
 
   const handleCreateSession = async () => {
+    setDisplayMessage("Session creating...");
     const info = {
       _id: data?._id,
       _token: applicationState?._token,
-      action: "/",
+      action: applicationState?.action,
       state: applicationState?.cookies,
     };
 
@@ -40,6 +43,7 @@ const InfoLogin: React.FC<IProps> = ({
         info,
       }).unwrap()) as {
         success: boolean;
+        message: string;
         data: IProcessResponse;
       };
 
@@ -48,6 +52,7 @@ const InfoLogin: React.FC<IProps> = ({
           _id: data?._id,
           ...response?.data,
         };
+        setDisplayMessage(response?.message);
         localStorage.setItem(data?._id, JSON.stringify(info));
         setApplicationState(info);
       }
@@ -57,10 +62,12 @@ const InfoLogin: React.FC<IProps> = ({
   };
 
   const handleCreateNewSession = async () => {
+    setDisplayMessage("Logout session creating...");
+
     const info = {
       _id: data?._id,
       _token: "",
-      action: "/",
+      action: applicationState?.action,
       state: [],
     };
 
@@ -69,6 +76,7 @@ const InfoLogin: React.FC<IProps> = ({
         info,
       }).unwrap()) as {
         success: boolean;
+        message: string;
         data: IProcessResponse;
       };
 
@@ -77,6 +85,7 @@ const InfoLogin: React.FC<IProps> = ({
           _id: data?._id,
           ...response?.data,
         };
+        setDisplayMessage("Logout session created!");
         localStorage.setItem(data?._id, JSON.stringify(info));
         setApplicationState(info);
       }
@@ -86,10 +95,11 @@ const InfoLogin: React.FC<IProps> = ({
   };
 
   const handleLogin = async () => {
+    setDisplayMessage("Authenticating...");
     const info = {
       _id: data?._id,
       _token: applicationState?._token,
-      action: "login",
+      action: applicationState?.action,
       state: applicationState?.cookies,
     };
 
@@ -98,15 +108,17 @@ const InfoLogin: React.FC<IProps> = ({
         info,
       }).unwrap()) as {
         success: boolean;
+        message: string;
         data: IProcessResponse;
       };
 
-      if (response?.success) {
+      if (response?.success && response?.data?.cookies?.length > 1) {
         const info = {
           ...response?.data,
           _id: data?._id,
           _token: applicationState?._token,
         };
+        setDisplayMessage(response?.message);
         localStorage.setItem(data?._id, JSON.stringify(info));
         setApplicationState(info);
         if (response?.data?.path === "/") {
@@ -123,6 +135,7 @@ const InfoLogin: React.FC<IProps> = ({
   };
 
   const handleAbort = async () => {
+    setDisplayMessage("Call aborting...");
     const info = {
       _id: data?._id,
       action: "abort",
@@ -130,6 +143,7 @@ const InfoLogin: React.FC<IProps> = ({
 
     try {
       await abortCall(info).unwrap();
+      setDisplayMessage("Call aborted!");
     } catch (error) {
       console.error(error);
     }
@@ -138,8 +152,8 @@ const InfoLogin: React.FC<IProps> = ({
   const medInfo = data?.info[0];
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-      <Box>
+    <Box sx={{ display: "flex", justifyContent: "flexStart", gap: "10px" }}>
+      <Box sx={{ width: "100%" }}>
         <Typography sx={{ fontSize: "12px", fontWeight: "bold" }}>
           Mission: {getCenter(data?.center)}, {getVisaType(data?.visaType)} -{" "}
           {data?.info?.length}
@@ -156,12 +170,32 @@ const InfoLogin: React.FC<IProps> = ({
         <Typography sx={{ fontSize: "12px", fontWeight: "bold" }}>
           Email: {data?.email?.split("@")[0] + ".."}
         </Typography>
+
+        <Typography
+          sx={{
+            padding: "10px",
+            bgcolor: "#D9D9D9",
+            fontSize: "12px",
+            fontWeight: "bold",
+            borderRadius: "2px",
+            width: "100%",
+            textAlign: "center",
+          }}
+        >
+          {applicationState?.action === "/" ? (
+            <span>No Session found!</span>
+          ) : (
+            <span style={{ textTransform: "uppercase" }}>
+              {applicationState?.action}
+            </span>
+          )}
+        </Typography>
       </Box>
 
       <Box
         sx={{
           bgcolor: "#D9D9D9",
-          width: "50%",
+          width: "100%",
           padding: "0.5rem",
           borderRadius: "4px",
         }}
