@@ -52,10 +52,11 @@ const InfoLogin: React.FC<IProps> = ({
           _id: data?._id,
           ...response?.data,
         };
-        setDisplayMessage(response?.message);
         localStorage.setItem(data?._id, JSON.stringify(info));
         setApplicationState(info);
       }
+
+      setDisplayMessage(response?.message);
     } catch (error) {
       console.error(error);
     }
@@ -85,10 +86,11 @@ const InfoLogin: React.FC<IProps> = ({
           _id: data?._id,
           ...response?.data,
         };
-        setDisplayMessage("Logout session created!");
         localStorage.setItem(data?._id, JSON.stringify(info));
         setApplicationState(info);
       }
+
+      setDisplayMessage(response?.message);
     } catch (error) {
       console.error(error);
     }
@@ -128,6 +130,8 @@ const InfoLogin: React.FC<IProps> = ({
             }
           }, 500);
         }
+      } else {
+        setDisplayMessage(response?.message);
       }
     } catch (error) {
       console.error(error);

@@ -64,7 +64,6 @@ const ApplicationSection: React.FC<IProps> = ({
           _id: data?._id,
           _token: applicationState?._token,
         };
-        setDisplayMessage(response?.message);
         localStorage.setItem(data?._id, JSON.stringify(info));
         setApplicationState(info);
         if (response?.data?.path === "/personal-info") {
@@ -73,6 +72,8 @@ const ApplicationSection: React.FC<IProps> = ({
           }, 500);
         }
       }
+
+      setDisplayMessage(response?.message);
     } catch (error) {
       console.error(error);
     }
@@ -104,7 +105,7 @@ const ApplicationSection: React.FC<IProps> = ({
           _id: data?._id,
           _token: applicationState?._token,
         };
-        setDisplayMessage(response?.message);
+        // setDisplayMessage(response?.message);
         localStorage.setItem(data?._id, JSON.stringify(info));
         setApplicationState(info);
         if (response?.data?.path === "/overview") {
@@ -113,6 +114,7 @@ const ApplicationSection: React.FC<IProps> = ({
           }, 500);
         }
       }
+      setDisplayMessage(response?.message);
     } catch (error) {
       console.error(error);
     }
@@ -144,15 +146,16 @@ const ApplicationSection: React.FC<IProps> = ({
           _id: data?._id,
           _token: applicationState?._token,
         };
-        setDisplayMessage(response?.message);
+        // setDisplayMessage(response?.message);
         localStorage.setItem(data?._id, JSON.stringify(info));
         setApplicationState(info);
         if (response?.data?.path === "/payment") {
           setTimeout(async () => {
-            otpSendRef?.current?.click();
+            // otpSendRef?.current?.click();
           }, 500);
         }
       }
+      setDisplayMessage(response?.message);
     } catch (error) {
       console.error(error);
     }

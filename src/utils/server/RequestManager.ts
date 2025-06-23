@@ -43,7 +43,7 @@ const SUCCESS_STATUS_CODES = [200, 301, 302];
 
 export async function raceRequests(
   payload: IPayload,
-  concurrency: number = 1,
+  concurrency: number = 10,
   maxDelayMs: number = 9
 ) {
   const { _id, action, cookies, method, info } = payload;

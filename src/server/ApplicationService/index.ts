@@ -163,16 +163,6 @@ export const VerifyOTP = async (payload: IPayload) => {
   }
 
   const data = await response.json();
-
-  const info = {
-    action: SessionSteps?.VERIFYPAYMENTOTP,
-    message: data?.message,
-    cookies,
-    slot_dates: [],
-    resend: 0,
-    path: "/verify-otp",
-  };
-
   console.log("data", data);
   // data {
   //   success: true,
@@ -184,6 +174,15 @@ export const VerifyOTP = async (payload: IPayload) => {
   //     error_reason: ''
   //   }
   // }
+
+  const info = {
+    action: SessionSteps?.VERIFYPAYMENTOTP,
+    message: data?.message,
+    cookies,
+    slot_dates: [],
+    resend: 0,
+    path: "/verify-otp",
+  };
 
   if (data?.success) {
     info.slot_dates = data?.slot_dates;
