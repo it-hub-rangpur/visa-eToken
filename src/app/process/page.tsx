@@ -7,7 +7,7 @@ const getProcessApplication = async (): Promise<IApplication[]> => {
   try {
     // Use relative URL
     const res = await fetch(
-      `${"http://localhost:3000"}/api/process-applications`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/process-applications`,
       {
         method: "GET",
         headers: {

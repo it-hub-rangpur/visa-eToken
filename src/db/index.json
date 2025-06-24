@@ -34,7 +34,39 @@
       "lastLogin": "2025-06-17T07:25:52.037Z"
     }
   },
-
+  {
+    "_id": "685b0ba23ba32528e2113cbc",
+    "center": 3,
+    "ivac": 2,
+    "visaType": 6,
+    "phone": "01620662527",
+    "email": "shohagroy27@gmail.com",
+    "password": "Password27@",
+    "info": [
+      {
+        "name": "MD HADI AL",
+        "web_id": "BGDRV0A86025",
+        "_id": "685b0ba23ba32528e2113cbd"
+      }
+    ],
+    "visit_purpose": "medical treatment",
+    "hash_params": "",
+    "selected_payment": {
+      "name": "VISA",
+      "slug": "visacard",
+      "link": "https://securepay.sslcommerz.com/gwprocess/v4/image/gw1/visa.png"
+    },
+    "createdAt": "2025-06-24T20:33:38.241Z",
+    "slot_dates": ["2025-06-26"],
+    "paymentStatus": {
+      "status": "",
+      "url": "",
+      "order_id": "",
+      "token_no": ""
+    },
+    "status": false,
+    "serverInfo": {}
+  },
   {
     "_id": "684e947edd357d61354f9a3d",
     "center": 1,

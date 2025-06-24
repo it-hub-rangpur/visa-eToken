@@ -34,9 +34,10 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
   };
 
   const response = await VerifyOTP(payload as IPayload);
+
   return sendResponse({
     statusCode: httpStatus.OK,
-    success: response?.slot_dates?.length > 0 ? true : false,
+    success: response?.success,
     message: response?.message,
     data: response,
   });

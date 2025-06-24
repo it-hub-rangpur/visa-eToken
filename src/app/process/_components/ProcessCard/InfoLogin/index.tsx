@@ -30,6 +30,7 @@ const InfoLogin: React.FC<IProps> = ({
   const createSessionRef = React.useRef<HTMLButtonElement>(null);
 
   const handleCreateSession = async () => {
+    localStorage.removeItem(data?._id);
     setDisplayMessage("Session creating...");
     const info = {
       _id: data?._id,
@@ -63,6 +64,7 @@ const InfoLogin: React.FC<IProps> = ({
   };
 
   const handleCreateNewSession = async () => {
+    localStorage.removeItem(data?._id);
     setDisplayMessage("Logout session creating...");
 
     const info = {

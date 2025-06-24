@@ -8,6 +8,7 @@ import {
 } from "@/lib/apis/Application/ApplicationApi";
 import { IApplication } from "@/lib/apis/Application/ApplicationSlice";
 import SocketIO from "@/Socket";
+import { getCurrentSession, SessionStep } from "@/utils/server/sessionWithStep";
 import { Box, Button, Stack, TextField } from "@mui/material";
 import React, { useEffect } from "react";
 
@@ -16,13 +17,15 @@ interface IProps {
   applicationState: IProcessResponse;
   setApplicationState: React.Dispatch<React.SetStateAction<IProcessResponse>>;
   otpSendRef: React.RefObject<HTMLButtonElement | null>;
+  setDisplayMessage: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const PaymentSection: React.FC<IProps> = ({
   data,
-  // setApplicationState,
+  setApplicationState,
   applicationState,
   otpSendRef,
+  setDisplayMessage,
 }) => {
   const [otp, setOtp] = React.useState<string>("");
 
@@ -38,6 +41,8 @@ const PaymentSection: React.FC<IProps> = ({
 
   const payOtpVerifyButtonRef = React.useRef<HTMLButtonElement>(null);
 
+  const getTimeSlotRef = React.useRef<HTMLButtonElement>(null);
+
   const handlePaymentOtp = async () => {
     const info = {
       _id: data?._id,
@@ -52,26 +57,22 @@ const PaymentSection: React.FC<IProps> = ({
         info,
       }).unwrap()) as {
         success: boolean;
+        message: string;
         data: IProcessResponse;
       };
 
-      console.log("response", response);
-
-      // if (response?.success && response?.data?.cookies?.length > 1) {
-      //   const info = {
-      //     ...response?.data,
-      //     isLoggedin: applicationState?.isLoggedin,
-      //     _id: data?._id,
-      //     _token: applicationState?._token,
-      //   };
-      //   localStorage.setItem(data?._id, JSON.stringify(info));
-      //   setApplicationState(info);
-      //   if (response?.data?.path === "/overview") {
-      //     setTimeout(async () => {
-      //       overviewRef?.current?.click();
-      //     }, 500);
-      //   }
-      // }
+      if (response?.success && response?.data?.cookies?.length > 1) {
+        const info = {
+          ...response?.data,
+          isLoggedin: applicationState?.isLoggedin,
+          _id: data?._id,
+          cookies: applicationState?.cookies,
+          _token: applicationState?._token,
+        };
+        localStorage.setItem(data?._id, JSON.stringify(info));
+        setApplicationState(info);
+      }
+      setDisplayMessage(response?.message);
     } catch (error) {
       console.error(error);
     }
@@ -91,35 +92,38 @@ const PaymentSection: React.FC<IProps> = ({
         info,
       }).unwrap()) as {
         success: boolean;
+        message: string;
         data: IProcessResponse;
       };
-
-      console.log("response", response);
-      // if (response?.success && response?.data?.cookies?.length > 1) {
-      //   const info = {
-      //     ...response?.data,
-      //     isLoggedin: applicationState?.isLoggedin,
-      //     _id: data?._id,
-      //     _token: applicationState?._token,
-      //   };
-      //   localStorage.setItem(data?._id, JSON.stringify(info));
-      //   setApplicationState(info);
-      //   if (response?.data?.path === "/payment") {
-      //     setTimeout(async () => {
-      //       console.log("move to payment ref");
-      //     }, 500);
-      //   }
-      // }
+      if (response?.success && response?.data?.cookies?.length > 1) {
+        const info = {
+          ...response?.data,
+          isLoggedin: applicationState?.isLoggedin,
+          _id: data?._id,
+          cookies: applicationState?.cookies,
+          _token: applicationState?._token,
+        };
+        localStorage.setItem(data?._id, JSON.stringify(info));
+        setApplicationState(info);
+        setTimeout(() => {
+          getTimeSlotRef?.current?.click();
+        }, 500);
+      }
+      setDisplayMessage(response?.message);
     } catch (error) {
       console.error(error);
     }
   };
 
   const handleGetTimeSlot = async () => {
+    const defaultDate = process.env.NEXT_PUBLIC_SLOT_DATE;
     const info = {
       _id: data?._id,
       _token: applicationState?._token,
       action: applicationState?.action,
+      slotDate: applicationState?.slot_dates?.length
+        ? applicationState?.slot_dates[0]
+        : defaultDate,
       state: applicationState?.cookies,
     };
 
@@ -128,35 +132,48 @@ const PaymentSection: React.FC<IProps> = ({
         info,
       }).unwrap()) as {
         success: boolean;
+        message: string;
         data: IProcessResponse;
       };
-
       console.log("response", response);
-      // if (response?.success && response?.data?.cookies?.length > 1) {
-      //   const info = {
-      //     ...response?.data,
-      //     isLoggedin: applicationState?.isLoggedin,
-      //     _id: data?._id,
-      //     _token: applicationState?._token,
-      //   };
-      //   localStorage.setItem(data?._id, JSON.stringify(info));
-      //   setApplicationState(info);
-      //   if (response?.data?.path === "/payment") {
-      //     setTimeout(async () => {
-      //       console.log("move to payment ref");
-      //     }, 500);
-      //   }
-      // }
+
+      if (response?.success) {
+        const info = {
+          ...response?.data,
+          isLoggedin: applicationState?.isLoggedin,
+          _id: data?._id,
+          cookies: applicationState?.cookies,
+          _token: applicationState?._token,
+        };
+        localStorage.setItem(data?._id, JSON.stringify(info));
+        setApplicationState(info);
+        // if (response?.data?.path === "/payment") {
+        //   setTimeout(async () => {
+        //     console.log("move to payment ref");
+        //   }, 500);
+        // }
+      }
+      setDisplayMessage(response?.message);
     } catch (error) {
       console.error(error);
     }
   };
 
   const handleBookNow = async () => {
+    const defaultDate = process.env.NEXT_PUBLIC_SLOT_DATE;
+    const defaultTime = process.env.NEXT_PUBLIC_SLOT_TIME;
+    const numberDefaultTime = Number(defaultTime);
+
     const info = {
       _id: data?._id,
       _token: applicationState?._token,
       action: applicationState?.action,
+      slotDate: applicationState?.slot_dates?.length
+        ? applicationState?.slot_dates[0]
+        : defaultDate,
+      slotTime: applicationState?.slot_times?.length
+        ? applicationState?.slot_times[0].hour
+        : numberDefaultTime,
       state: applicationState?.cookies,
     };
 
@@ -213,6 +230,10 @@ const PaymentSection: React.FC<IProps> = ({
     };
   }, [data?.phone]);
 
+  const currentStep = getCurrentSession(
+    applicationState?.action as SessionStep
+  );
+
   return (
     <Box
       sx={{
@@ -236,9 +257,16 @@ const PaymentSection: React.FC<IProps> = ({
           <Stack direction="row" spacing={0.5}>
             <Button
               ref={otpSendRef}
-              disabled={paymentOtpLoading}
+              // disabled={paymentOtpLoading}
               onClick={handlePaymentOtp}
               size="small"
+              color={
+                currentStep > 6
+                  ? "success"
+                  : paymentOtpLoading
+                  ? "warning"
+                  : "primary"
+              }
               variant="contained"
               sx={{
                 textTransform: "none",
@@ -270,9 +298,16 @@ const PaymentSection: React.FC<IProps> = ({
 
             <Button
               ref={payOtpVerifyButtonRef}
-              disabled={otpVerifyLoading || otp?.length !== 6}
+              disabled={otp?.length !== 6}
               onClick={handleVerifyOtp}
               size="small"
+              color={
+                currentStep > 7
+                  ? "success"
+                  : otpVerifyLoading
+                  ? "warning"
+                  : "primary"
+              }
               variant="contained"
               sx={{
                 width: "100%",
@@ -286,9 +321,16 @@ const PaymentSection: React.FC<IProps> = ({
           <Stack direction="row" spacing={0.5}>
             <Button
               // ref={applicationRef}
-              disabled={getTimeSlotLoading}
+              // disabled={getTimeSlotLoading}
               onClick={handleGetTimeSlot}
               size="small"
+              color={
+                currentStep > 8
+                  ? "success"
+                  : getTimeSlotLoading
+                  ? "warning"
+                  : "primary"
+              }
               variant="contained"
               sx={{
                 textTransform: "none",

@@ -81,6 +81,7 @@ const ProcessCard: React.FC<IProps> = ({ data }) => {
           data={data}
           applicationState={applicationState}
           setApplicationState={setApplicationState}
+          setDisplayMessage={setDisplayMessage}
           otpSendRef={otpSendRef}
         />
       </Box>

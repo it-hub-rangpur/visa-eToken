@@ -64,9 +64,9 @@ const ApplicationSection: React.FC<IProps> = ({
           _id: data?._id,
           _token: applicationState?._token,
         };
-        localStorage.setItem(data?._id, JSON.stringify(info));
-        setApplicationState(info);
         if (response?.data?.path === "/personal-info") {
+          setApplicationState(info);
+          localStorage.setItem(data?._id, JSON.stringify(info));
           setTimeout(async () => {
             personalRef?.current?.click();
           }, 500);
@@ -106,9 +106,9 @@ const ApplicationSection: React.FC<IProps> = ({
           _token: applicationState?._token,
         };
         // setDisplayMessage(response?.message);
-        localStorage.setItem(data?._id, JSON.stringify(info));
-        setApplicationState(info);
         if (response?.data?.path === "/overview") {
+          localStorage.setItem(data?._id, JSON.stringify(info));
+          setApplicationState(info);
           setTimeout(async () => {
             overviewRef?.current?.click();
           }, 500);
@@ -146,12 +146,11 @@ const ApplicationSection: React.FC<IProps> = ({
           _id: data?._id,
           _token: applicationState?._token,
         };
-        // setDisplayMessage(response?.message);
-        localStorage.setItem(data?._id, JSON.stringify(info));
-        setApplicationState(info);
         if (response?.data?.path === "/payment") {
+          localStorage.setItem(data?._id, JSON.stringify(info));
+          setApplicationState(info);
           setTimeout(async () => {
-            // otpSendRef?.current?.click();
+            otpSendRef?.current?.click();
           }, 500);
         }
       }
@@ -164,8 +163,6 @@ const ApplicationSection: React.FC<IProps> = ({
   const currentStep = getCurrentSession(
     applicationState?.action as SessionStep
   );
-
-  console.log("currentStep", currentStep);
 
   return (
     <Box
@@ -184,7 +181,7 @@ const ApplicationSection: React.FC<IProps> = ({
           onClick={applicationInfo}
           size="small"
           color={
-            currentStep >= 3
+            currentStep > 3
               ? "success"
               : applicationInfoLoading
               ? "warning"
@@ -204,7 +201,7 @@ const ApplicationSection: React.FC<IProps> = ({
           onClick={personalInfo}
           size="small"
           color={
-            currentStep >= 4
+            currentStep > 4
               ? "success"
               : personalInfoLoading
               ? "warning"
@@ -223,7 +220,7 @@ const ApplicationSection: React.FC<IProps> = ({
           ref={overviewRef}
           onClick={overviewInfo}
           color={
-            currentStep >= 5
+            currentStep > 5
               ? "success"
               : overviewInfoLoading
               ? "warning"

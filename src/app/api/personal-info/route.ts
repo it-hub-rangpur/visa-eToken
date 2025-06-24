@@ -1,6 +1,7 @@
 "use server";
 
 import { IPayload, IProcessRequest } from "@/interfaces";
+import { IApplication } from "@/lib/apis/Application/ApplicationSlice";
 import { PersonalInfo } from "@/server/ApplicationService";
 import { getById } from "@/server/ServerServices";
 import ApiError from "@/utils/ErrorHandelars/ApiError";
@@ -26,12 +27,13 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
   }
 
   const currentSession = getCurrentSession(data?.action as SessionStep);
+  console.log("currentSession", currentSession);
 
-  if (currentSession <= 1) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Session Not Found!");
+  if (currentSession < 4) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Session not found or invalid!");
   }
 
-  const info = personalInfoPayload(data._token, application);
+  const info = personalInfoPayload(data._token, application as IApplication);
 
   const payload = {
     _id: data._id,
@@ -44,8 +46,8 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
   const response = await PersonalInfo(payload as IPayload);
   return sendResponse({
     statusCode: httpStatus.OK,
-    success: true,
-    message: "Personal info submitted!",
+    success: response?.success,
+    message: response?.message,
     data: response,
   });
 });

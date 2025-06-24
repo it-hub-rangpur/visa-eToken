@@ -5,8 +5,8 @@ export interface IProcessRequest {
   state: string[];
   resend?: number;
   otp?: string;
-  date?: string;
-  time?: number;
+  slotDate?: string;
+  slotTime?: number;
   hashParam?: string;
 }
 
@@ -18,6 +18,9 @@ export interface IProcessResponse {
   path?: string;
   cookies: string[];
   resend?: number;
+  success?: boolean;
+  slot_dates?: string[];
+  slot_times?: { hour: number }[];
 }
 
 export interface IPayload {
@@ -25,5 +28,8 @@ export interface IPayload {
   cookies: string[];
   action?: string;
   method?: string;
+  resend?: number;
   info?: { [key: string]: string | number };
+  otp?: string;
+  success?: boolean;
 }

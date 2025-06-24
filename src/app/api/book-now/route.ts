@@ -33,8 +33,8 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
 
   const info = getBookSlotPayload(
     data._token,
-    data?.date as string,
-    data?.time as number,
+    data?.slotDate as string,
+    data?.slotTime as number,
     data?.hashParam as string
   );
 
@@ -46,11 +46,13 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
     info,
   };
 
-  const response = await BookNow(payload as IPayload);
+  console.log("payload", payload);
+
+  // const response = await BookNow(payload as IPayload);
   return sendResponse({
     statusCode: httpStatus.OK,
     success: true,
     message: "Slot Booked!",
-    data: response,
+    data: { message: "Booked" },
   });
 });

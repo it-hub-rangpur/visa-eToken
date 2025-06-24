@@ -1,6 +1,7 @@
 "use server";
 
 import { IPayload, IProcessRequest } from "@/interfaces";
+import { IApplication } from "@/lib/apis/Application/ApplicationSlice";
 import { ApplicationInfo } from "@/server/ApplicationService";
 import { getById } from "@/server/ServerServices";
 import ApiError from "@/utils/ErrorHandelars/ApiError";
@@ -31,7 +32,7 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
     throw new ApiError(httpStatus.NOT_FOUND, "Session Not Found!");
   }
 
-  const info = applicationInfoPayload(data._token, application);
+  const info = applicationInfoPayload(data._token, application as IApplication);
 
   const payload = {
     _id: data._id,
@@ -44,8 +45,8 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
   const response = await ApplicationInfo(payload as IPayload);
   return sendResponse({
     statusCode: httpStatus.OK,
-    success: true,
-    message: "Application info submitted!",
+    success: response?.success,
+    message: response?.message,
     data: response,
   });
 });

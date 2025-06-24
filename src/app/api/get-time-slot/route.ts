@@ -3,11 +3,9 @@
 import { IPayload, IProcessRequest } from "@/interfaces";
 import { GetTimeSlot } from "@/server/ApplicationService";
 import { getById } from "@/server/ServerServices";
-import ApiError from "@/utils/ErrorHandelars/ApiError";
 import { catchAsync } from "@/utils/helpers/catchAsync";
 import sendResponse from "@/utils/helpers/sendResponse";
 import { getTimeSlotPayload } from "@/utils/payloads";
-import { getCurrentSession, SessionStep } from "@/utils/server/sessionWithStep";
 import httpStatus from "http-status";
 import { NextResponse } from "next/server";
 
@@ -25,13 +23,7 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
     });
   }
 
-  const currentSession = getCurrentSession(data?.action as SessionStep);
-
-  if (currentSession <= 0) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Session Not Found!");
-  }
-
-  const info = getTimeSlotPayload(data._token, data?.date as string);
+  const info = getTimeSlotPayload(data._token, data?.slotDate as string);
 
   const payload = {
     _id: data._id,
@@ -44,8 +36,8 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
   const response = await GetTimeSlot(payload as IPayload);
   return sendResponse({
     statusCode: httpStatus.OK,
-    success: true,
-    message: "Time Slot Found!",
+    success: response?.success,
+    message: response?.message,
     data: response,
   });
 });

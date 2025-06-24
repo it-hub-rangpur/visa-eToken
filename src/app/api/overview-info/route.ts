@@ -27,8 +27,8 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
 
   const currentSession = getCurrentSession(data?.action as SessionStep);
 
-  if (currentSession <= 2) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Session Not Found!");
+  if (currentSession < 5) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Session not found or invalid!");
   }
 
   const info = overviewInfoPayload(data._token);
@@ -44,8 +44,8 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
   const response = await OverviewInfo(payload as IPayload);
   return sendResponse({
     statusCode: httpStatus.OK,
-    success: true,
-    message: "Overview info submitted!",
+    success: response?.success,
+    message: response?.message,
     data: response,
   });
 });
