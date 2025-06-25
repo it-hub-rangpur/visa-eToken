@@ -21,7 +21,7 @@ export interface IProcessResponse {
   success?: boolean;
   slot_dates?: string[];
   slot_times?: { hour: number; date: string }[];
-  url: string;
+  url?: string;
 }
 
 export interface IPayload {
