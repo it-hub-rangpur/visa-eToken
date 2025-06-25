@@ -7,6 +7,7 @@ import {
   usePaymentOtpMutation,
 } from "@/lib/apis/Application/ApplicationApi";
 import { IApplication } from "@/lib/apis/Application/ApplicationSlice";
+import { useGetCaptchaMutation } from "@/lib/apis/server/serverApi";
 import SocketIO from "@/Socket";
 import { getCurrentSession, SessionStep } from "@/utils/server/sessionWithStep";
 import { Box, Button, Stack, TextField } from "@mui/material";
@@ -28,6 +29,7 @@ const PaymentSection: React.FC<IProps> = ({
   setDisplayMessage,
 }) => {
   const [otp, setOtp] = React.useState<string>("");
+  const [hashParam, setHashParam] = React.useState<string>("");
 
   const [paymentOtp, { isLoading: paymentOtpLoading }] =
     usePaymentOtpMutation();
@@ -37,13 +39,19 @@ const PaymentSection: React.FC<IProps> = ({
   const [getTimeSlot, { isLoading: getTimeSlotLoading }] =
     useGetTimeSlotMutation();
 
+  const [getCaptcha, { isLoading: getCaptchaLoading }] =
+    useGetCaptchaMutation();
+
   const [bookSlot, { isLoading: bookSlotLoading }] = useBookSlotMutation();
 
   const payOtpVerifyButtonRef = React.useRef<HTMLButtonElement>(null);
 
   const getTimeSlotRef = React.useRef<HTMLButtonElement>(null);
+  const getCaptchaRef = React.useRef<HTMLButtonElement>(null);
+  const bookSlotRef = React.useRef<HTMLButtonElement>(null);
 
   const handlePaymentOtp = async () => {
+    setDisplayMessage("OTP sending...");
     const info = {
       _id: data?._id,
       _token: applicationState?._token,
@@ -79,6 +87,7 @@ const PaymentSection: React.FC<IProps> = ({
   };
 
   const handleVerifyOtp = async () => {
+    setDisplayMessage("OTP verifying...");
     const info = {
       _id: data?._id,
       _token: applicationState?._token,
@@ -116,6 +125,7 @@ const PaymentSection: React.FC<IProps> = ({
   };
 
   const handleGetTimeSlot = async () => {
+    setDisplayMessage("Time slot getting...");
     const defaultDate = process.env.NEXT_PUBLIC_SLOT_DATE;
     const info = {
       _id: data?._id,
@@ -135,7 +145,6 @@ const PaymentSection: React.FC<IProps> = ({
         message: string;
         data: IProcessResponse;
       };
-      console.log("response", response);
 
       if (response?.success) {
         const info = {
@@ -147,11 +156,25 @@ const PaymentSection: React.FC<IProps> = ({
         };
         localStorage.setItem(data?._id, JSON.stringify(info));
         setApplicationState(info);
-        // if (response?.data?.path === "/payment") {
-        //   setTimeout(async () => {
-        //     console.log("move to payment ref");
-        //   }, 500);
-        // }
+        // setTimeout(() => {
+        //   getCaptchaRef?.current?.click();
+        // }, 500);
+      }
+      setDisplayMessage(response?.message);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleCapthaToken = async () => {
+    setDisplayMessage("Captcha getting...");
+    try {
+      const response = await getCaptcha({ _id: data?._id }).unwrap();
+      if (response?.data) {
+        setHashParam(response?.data);
+        setTimeout(() => {
+          bookSlotRef?.current?.click();
+        });
       }
       setDisplayMessage(response?.message);
     } catch (error) {
@@ -160,6 +183,7 @@ const PaymentSection: React.FC<IProps> = ({
   };
 
   const handleBookNow = async () => {
+    setDisplayMessage("Slot booking...");
     const defaultDate = process.env.NEXT_PUBLIC_SLOT_DATE;
     const defaultTime = process.env.NEXT_PUBLIC_SLOT_TIME;
     const numberDefaultTime = Number(defaultTime);
@@ -168,13 +192,14 @@ const PaymentSection: React.FC<IProps> = ({
       _id: data?._id,
       _token: applicationState?._token,
       action: applicationState?.action,
-      slotDate: applicationState?.slot_dates?.length
-        ? applicationState?.slot_dates[0]
+      slotDate: applicationState?.slot_times?.length
+        ? applicationState?.slot_times[0].date
         : defaultDate,
       slotTime: applicationState?.slot_times?.length
         ? applicationState?.slot_times[0].hour
         : numberDefaultTime,
       state: applicationState?.cookies,
+      hashParam,
     };
 
     try {
@@ -182,27 +207,41 @@ const PaymentSection: React.FC<IProps> = ({
         info,
       }).unwrap()) as {
         success: boolean;
+        message: string;
         data: IProcessResponse;
       };
 
-      console.log("response", response);
-      // if (response?.success && response?.data?.cookies?.length > 1) {
-      //   const info = {
-      //     ...response?.data,
-      //     isLoggedin: applicationState?.isLoggedin,
-      //     _id: data?._id,
-      //     _token: applicationState?._token,
-      //   };
-      //   localStorage.setItem(data?._id, JSON.stringify(info));
-      //   setApplicationState(info);
-      //   if (response?.data?.path === "/payment") {
-      //     setTimeout(async () => {
-      //       console.log("move to payment ref");
-      //     }, 500);
-      //   }
-      // }
+      if (response?.success) {
+        const info = {
+          ...response?.data,
+          isLoggedin: applicationState?.isLoggedin,
+          _id: data?._id,
+          cookies: applicationState?.cookies,
+          _token: applicationState?._token,
+        };
+        localStorage.setItem(data?._id, JSON.stringify(info));
+        setApplicationState(info);
+      }
+      setDisplayMessage(response?.message);
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleOpenURL = () => {
+    setDisplayMessage("Payment URL Opening...");
+    const url = applicationState?.url;
+    if (url) {
+      window.open(url, "_blank");
+    }
+  };
+
+  const handleCopyURL = () => {
+    const url = applicationState?.url;
+    if (url) {
+      navigator.clipboard.writeText(url).then(() => {
+        setDisplayMessage("Payment URL copied to clipboard");
+      });
     }
   };
 
@@ -320,8 +359,7 @@ const PaymentSection: React.FC<IProps> = ({
 
           <Stack direction="row" spacing={0.5}>
             <Button
-              // ref={applicationRef}
-              // disabled={getTimeSlotLoading}
+              ref={getTimeSlotRef}
               onClick={handleGetTimeSlot}
               size="small"
               color={
@@ -341,23 +379,31 @@ const PaymentSection: React.FC<IProps> = ({
             </Button>
 
             <Button
-              // ref={applicationRef}
-              // disabled={applicationInfoLoading}
-              // onClick={applicationInfo}
+              onClick={handleCapthaToken}
+              ref={getCaptchaRef}
+              disabled={getCaptchaLoading}
               size="small"
               variant="contained"
+              color="error"
               sx={{
                 textTransform: "none",
                 width: "100%",
               }}
             >
-              Token
+              {getCaptchaLoading ? "Getting..." : "Captcha"}
             </Button>
 
             <Button
-              // ref={applicationRef}
-              disabled={bookSlotLoading}
+              ref={bookSlotRef}
+              disabled={!hashParam}
               onClick={handleBookNow}
+              color={
+                currentStep > 9
+                  ? "success"
+                  : bookSlotLoading
+                  ? "warning"
+                  : "primary"
+              }
               size="small"
               variant="contained"
               sx={{
@@ -371,11 +417,11 @@ const PaymentSection: React.FC<IProps> = ({
 
           <Stack direction="row" spacing={0.5}>
             <Button
-              // ref={applicationRef}
-              // disabled={applicationInfoLoading}
-              // onClick={applicationInfo}
+              onClick={handleCopyURL}
+              disabled={!applicationState?.url}
               size="small"
               variant="contained"
+              color="success"
               sx={{
                 textTransform: "none",
                 width: "100%",
@@ -385,11 +431,11 @@ const PaymentSection: React.FC<IProps> = ({
             </Button>
 
             <Button
-              // ref={applicationRef}
-              // disabled={applicationInfoLoading}
-              // onClick={applicationInfo}
+              onClick={handleOpenURL}
+              disabled={!applicationState?.url}
               size="small"
               variant="contained"
+              color="success"
               sx={{
                 textTransform: "none",
                 width: "100%",

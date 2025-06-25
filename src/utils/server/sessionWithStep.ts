@@ -9,6 +9,7 @@ export const SessionSteps = {
   VERIFYPAYMENTOTP: "verify-payment-otp",
   GETTIMESLOT: "get-time-slot",
   BOOKNOW: "book-now",
+  SLOTINIT: "slot-init",
 } as const;
 
 export type SessionStep = (typeof SessionSteps)[keyof typeof SessionSteps];
@@ -23,6 +24,7 @@ const serverSession: Record<SessionStep, number> = {
   [SessionSteps.VERIFYPAYMENTOTP]: 7,
   [SessionSteps.GETTIMESLOT]: 8,
   [SessionSteps.BOOKNOW]: 9,
+  [SessionSteps.SLOTINIT]: 10,
 };
 
 export const getCurrentSession = (current: SessionStep) => {

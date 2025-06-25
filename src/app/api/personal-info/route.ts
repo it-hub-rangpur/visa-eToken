@@ -27,7 +27,6 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
   }
 
   const currentSession = getCurrentSession(data?.action as SessionStep);
-  console.log("currentSession", currentSession);
 
   if (currentSession < 4) {
     throw new ApiError(httpStatus.NOT_FOUND, "Session not found or invalid!");

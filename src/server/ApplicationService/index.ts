@@ -81,9 +81,7 @@ export const PersonalInfo = async (payload: IPayload) => {
   const response = (await raceRequests(payload)) as Response;
 
   const cookies = response?.headers?.getSetCookie();
-  // const redirectPath = response?.headers?.get("Location");
-  // const path =
-  //   redirectPath === "https://payment.ivacbd.com/overview" ? "/overview" : "/";
+
   const info = {
     success: true,
     message: "Personal info submitted!",
@@ -99,11 +97,7 @@ export const OverviewInfo = async (payload: IPayload) => {
   const response = (await raceRequests(payload)) as Response;
 
   const cookies = response?.headers?.getSetCookie();
-  // const redirectPath = response?.headers?.get("Location");
-  // const path =
-  //   redirectPath === "https://payment.ivacbd.com/payment" ? "/payment" : "/";
 
-  // console.log("redirectPath", redirectPath);
   const info = {
     success: true,
     message: "Overview info submitted!",
@@ -120,8 +114,6 @@ export const PaymentOTP = async (payload: IPayload) => {
   const response = (await raceRequests(payload)) as Response;
   const cookies = response?.headers?.getSetCookie();
   const redirectPath = response?.headers?.get("Location");
-
-  console.log("redirectPath", redirectPath);
 
   if (redirectPath) {
     throw new ApiError(httpStatus.NOT_FOUND, "Session not found or invalid!");
@@ -146,11 +138,11 @@ export const PaymentOTP = async (payload: IPayload) => {
   // /pay-otp-sent { success: true, message: 'Sms send successfully' }
   if (data?.success && data?.message === "Sms send successfully") {
     const info = {
-      action: SessionSteps?.PAYMENTOTP,
+      action: SessionSteps?.VERIFYPAYMENTOTP,
       message: data?.message,
       cookies,
       resend: (payload?.info?.resend as number) + 1,
-      path: "/pay-otp-sent",
+      path: payload?.action,
     };
     return info;
   } else {
@@ -178,14 +170,12 @@ export const VerifyOTP = async (payload: IPayload) => {
   const cookies = response?.headers?.getSetCookie();
   const redirectPath = response?.headers?.get("Location");
 
-  console.log("redirectPath", redirectPath);
-
   if (redirectPath) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Session Not Found!");
+    throw new ApiError(httpStatus.NOT_FOUND, "Session not found or invalid!");
   }
 
   const data = await response.json();
-  console.log(payload?.action, data);
+  // console.log(payload?.action, data);
 
   // const data = {
   //   success: true,
@@ -220,7 +210,7 @@ export const VerifyOTP = async (payload: IPayload) => {
 
   const info = {
     success: data?.success,
-    action: SessionSteps?.VERIFYPAYMENTOTP,
+    action: "",
     message: data?.message ?? "OTP verified fail!",
     cookies,
     slot_dates: [] as string[],
@@ -229,6 +219,7 @@ export const VerifyOTP = async (payload: IPayload) => {
   };
 
   if (data?.success) {
+    info.action = SessionSteps?.GETTIMESLOT;
     info.slot_dates = data?.data?.slot_dates;
     info.message = "OTP verified successfully!";
   } else {
@@ -237,6 +228,7 @@ export const VerifyOTP = async (payload: IPayload) => {
         ? data?.message
         : data?.message?.error ?? "Fail to verify OTP!";
     info.message = errorMessage;
+    info.action = SessionSteps?.VERIFYPAYMENTOTP;
   }
   return info;
 };
@@ -246,15 +238,13 @@ export const GetTimeSlot = async (payload: IPayload) => {
   const cookies = response?.headers?.getSetCookie();
   const redirectPath = response?.headers?.get("Location");
 
-  console.log("redirectPath", redirectPath);
-
   if (redirectPath) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Session Not Found!");
+    throw new ApiError(httpStatus.NOT_FOUND, "Session not found or invalid!");
   }
 
   const data = await response.json();
 
-  console.log("data", data);
+  // console.log("data", data);
 
   // const data = {
   //   success: true,
@@ -280,7 +270,7 @@ export const GetTimeSlot = async (payload: IPayload) => {
   //       ],
 
   const info = {
-    action: SessionSteps?.GETTIMESLOT,
+    action: "",
     message: "",
     success: data?.success,
     cookies,
@@ -291,9 +281,16 @@ export const GetTimeSlot = async (payload: IPayload) => {
 
   if (data?.success) {
     info.message = `Slot time fetched successfully! - (${data?.data?.slot_times[0]?.availableSlot})`;
+    info.action = SessionSteps?.BOOKNOW;
     info.slot_times = data?.data?.slot_times as { hour: number }[];
   } else {
-    info.message = data?.message ?? "Fail to fetch slot time!";
+    info.message =
+      typeof data?.message === "string"
+        ? data?.message
+        : typeof data?.message?.error === "string"
+        ? data?.message?.error
+        : "Fail to get slot time!";
+    info.action = SessionSteps?.GETTIMESLOT;
   }
   return info;
 };
@@ -302,44 +299,42 @@ export const BookNow = async (payload: IPayload) => {
   const cookies = response?.headers?.getSetCookie();
   const redirectPath = response?.headers?.get("Location");
 
-  console.log("redirectPath", redirectPath);
-
   if (redirectPath) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Session Not Found!");
+    throw new ApiError(httpStatus.NOT_FOUND, "Session not found or invalid!");
   }
+
+  console.log("payload", payload);
 
   const data = await response.json();
 
   const info = {
-    action: SessionSteps?.VERIFYPAYMENTOTP,
-    message: data?.message,
+    action: "",
+    message: "",
     cookies,
-    slot_dates: [],
     resend: 0,
-    path: "/verify-otp",
+    url: "",
+    path: payload?.action,
   };
 
-  console.log("data", data);
-  // data {
-  //   success: true,
-  //   message: '',
-  //   data: {
-  //     slot_times: [],
-  //     slot_dates: [ '2025-06-23' ],
-  //     status: true,
-  //     error_reason: ''
-  //   }
-  // }
-
   if (data?.success) {
-    info.slot_dates = data?.slot_dates;
-    return info;
+    info.message = "Slot booking initiated";
+    info.action = SessionSteps?.SLOTINIT;
+    info.url = data?.url;
   } else {
-    const errorMessage =
-      typeof data?.message === "string"
-        ? data?.message
-        : data?.message?.error ?? "Fail to verify OTP!";
-    info.message = errorMessage;
-    return info;
+    info.action = SessionSteps?.BOOKNOW;
+
+    console.log("data", data);
+
+    if (data?.message === "Slot is not available.") {
+      info.message = "Slot is not available.";
+    } else {
+      info.message =
+        typeof data?.message === "string"
+          ? data?.message
+          : typeof data?.message?.error === "string"
+          ? data?.message?.error
+          : "Fail to book slot!";
+    }
   }
+  return info;
 };

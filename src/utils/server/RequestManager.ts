@@ -2,6 +2,9 @@ import { Agent, fetch } from "undici";
 import ApiError from "../ErrorHandelars/ApiError";
 import { IPayload } from "@/interfaces";
 
+const multipleCall =
+  Number(process.env.NEXT_PUBLIC_API_MULTIPLE_CALL ?? "10") ?? 1;
+
 export function createHeaders(state: string[]): Headers {
   const headers = new Headers();
   headers.set("accept-language", "en-US,en;q=0.9");
@@ -43,7 +46,7 @@ const SUCCESS_STATUS_CODES = [200, 301, 302];
 
 export async function raceRequests(
   payload: IPayload,
-  concurrency: number = 10,
+  concurrency: number = multipleCall,
   maxDelayMs: number = 9
 ) {
   const { _id, action, cookies, method, info } = payload;
