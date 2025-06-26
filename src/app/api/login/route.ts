@@ -47,8 +47,8 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
 
   return sendResponse({
     statusCode: httpStatus.OK,
-    success: true,
-    message: "Login Successfully!",
+    success: response?.success,
+    message: response?.success ? "Login Successfully!" : "Login Failed!",
     data: response,
   });
 });

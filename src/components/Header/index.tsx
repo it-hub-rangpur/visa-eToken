@@ -12,9 +12,7 @@ const Header = () => {
       }}
     >
       <Box>
-        <Typography
-          sx={{ fontSize: "1.5rem", fontWeight: "bold", color: "#FFF" }}
-        >
+        <Typography sx={{ fontSize: "1.5rem", fontWeight: "bold" }}>
           IT-Hub
         </Typography>
       </Box>

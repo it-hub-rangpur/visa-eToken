@@ -53,7 +53,7 @@ export async function raceRequests(
   const headers = createHeaders(cookies);
 
   const controllers = Array.from(
-    { length: action === "/pay-otp-sent" ? 1 : concurrency },
+    { length: concurrency },
     () => new AbortController()
   );
   const timeouts: NodeJS.Timeout[] = [];
@@ -115,6 +115,7 @@ export async function raceRequests(
       }
       return response;
     };
+
     controllers.forEach((controller, i) => {
       const delay = i === 0 ? 0 : Math.floor(Math.random() * maxDelayMs);
       const timeout = setTimeout(async () => {

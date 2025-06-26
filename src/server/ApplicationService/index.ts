@@ -37,14 +37,18 @@ export const DoLogin = async (payload: IPayload) => {
 
   const cookies = response?.headers?.getSetCookie();
   const redirectPath = response?.headers?.get("Location");
+  const isLoginSuccessfull =
+    redirectPath === "https://payment.ivacbd.com/iv-admin" ? true : false;
 
   const sessionInfo = GetSessionInfo(htmlText);
   const info = {
     ...sessionInfo,
-    action: SessionSteps?.LOGIN_SUCCESSFUL,
+    success: isLoginSuccessfull,
+    action: isLoginSuccessfull
+      ? SessionSteps?.LOGIN_SUCCESSFUL
+      : SessionSteps?.SESSION_CREATED,
     cookies,
-    path:
-      redirectPath === "https://payment.ivacbd.com/iv-admin" ? "/" : "/login",
+    path: isLoginSuccessfull ? "/" : "/login",
   };
 
   return info;

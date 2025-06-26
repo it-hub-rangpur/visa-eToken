@@ -1,5 +1,5 @@
 import Header from "@/components/Header";
-import { Box } from "@mui/material";
+import PrivateLayout from "@/layouts/PaivateLayout";
 import React from "react";
 
 export const metadata = {
@@ -9,10 +9,10 @@ export const metadata = {
 
 const ProcessLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <Box>
+    <PrivateLayout>
       <Header />
       {children}
-    </Box>
+    </PrivateLayout>
   );
 };
 
