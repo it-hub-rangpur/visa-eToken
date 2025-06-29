@@ -156,9 +156,9 @@ const PaymentSection: React.FC<IProps> = ({
         };
         localStorage.setItem(data?._id, JSON.stringify(info));
         setApplicationState(info);
-        // setTimeout(() => {
-        //   getCaptchaRef?.current?.click();
-        // }, 500);
+        setTimeout(() => {
+          getCaptchaRef?.current?.click();
+        }, 500);
       }
       setDisplayMessage(response?.message);
     } catch (error) {
