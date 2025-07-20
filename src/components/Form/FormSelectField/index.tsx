@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import { Field, FieldProps } from "formik";
 import React from "react";
-import theme from "../../../theme";
 
 interface ISelect {
   name: string;
@@ -38,7 +37,7 @@ const FormSelectField: React.FC<ISelect> = ({
     <Box maxWidth={"500px"}>
       <Typography
         variant="body1"
-        marginBottom={inline ?? false ? "0px" : "10px"}
+        marginBottom={inline ?? false ? "0px" : "5px"}
         paddingY={inline ?? false ? "15px" : "0px"}
         sx={{
           fontWeight: 500,
@@ -105,7 +104,6 @@ const FormSelectField: React.FC<ISelect> = ({
                     size="small"
                     sx={{
                       width: "100%",
-                      color: theme.colorConstants.darkGray,
                       fontSize: "14px",
                       fontWeight: 500,
                       textTransform: "capitalize",
@@ -134,7 +132,6 @@ const FormSelectField: React.FC<ISelect> = ({
                       <MenuItem
                         key={i}
                         sx={{
-                          color: theme.colorConstants.darkGray,
                           fontSize: "14px",
                           fontWeight: 500,
                           textTransform: "capitalize",

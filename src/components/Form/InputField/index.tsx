@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import {
   Box,
   FormHelperText,
@@ -47,7 +46,7 @@ const FormInputField: React.FC<IInput> = ({
     >
       <Typography
         variant="body1"
-        marginBottom={inline ?? false ? "0px" : "10px"}
+        marginBottom={inline ?? false ? "0px" : "5px"}
         paddingY={inline ?? false ? "15px" : "0px"}
         sx={{
           fontWeight: 500,

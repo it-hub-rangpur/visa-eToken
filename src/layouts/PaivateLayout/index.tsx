@@ -1,34 +1,47 @@
-"use client";
+import React, { ComponentType } from "react";
 
-import { useGetLoginUserQuery } from "@/lib/apis/server/serverApi";
-import { Box, Typography } from "@mui/material";
-import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+const PrivateRouteHOC = <P extends object>(
+  WrappedComponent: ComponentType<P>
+): ComponentType<P> => {
+  const ProtectedRoute: React.FC<P> = (props) => {
+    // const dispatch = useAppDispatch();
+    // const router = useRouter();
+    // const pathname = usePathname();
+    // useEffect(() => {
+    //   dispatch(getUserInfoThunk()).catch((_) => {
+    //     //
+    //   });
+    // }, [dispatch]);
 
-const PrivateLayout = ({ children }: { children: React.ReactNode }) => {
-  const { data, isLoading } = useGetLoginUserQuery(undefined);
-  const router = useRouter();
+    // const {
+    //   user,
+    //   loaders: { getUserInfoLoading },
+    // } = useAppSelector((state) => state.supplyAuth);
 
-  useEffect(() => {
-    if (!isLoading && data?.data?.role !== "superadmin") {
-      router.replace("/login");
-    }
-  }, [isLoading, data, router]);
+    // const { isLoading: initialLoading, isFetching } = useGetUserOrdersQuery(
+    //   {
+    //     id: user?.id,
+    //   },
+    //   {
+    //     skip: !user?.id,
+    //   }
+    // );
 
-  if (isLoading) {
-    return (
-      <Box>
-        <Typography>Loading....</Typography>
-      </Box>
-    );
-  }
+    // const isLoggedin = user?.id && user?.email ? true : false;
 
-  // Show nothing while redirecting (not superadmin)
-  if (data?.data?.role !== "superadmin") {
-    return null;
-  }
+    // if (getUserInfoLoading || initialLoading || isFetching) {
+    //   return <Loader height="100vh" />;
+    // }
 
-  return <Box>{children}</Box>;
+    // if (!isLoggedin) {
+    //   router.replace(`/login?navigateTo=${pathname}`);
+    //   return null;
+    // }
+
+    return <WrappedComponent {...props} />;
+  };
+
+  return ProtectedRoute;
 };
 
-export default PrivateLayout;
+export default PrivateRouteHOC;

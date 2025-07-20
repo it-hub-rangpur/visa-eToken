@@ -1,5 +1,6 @@
 // // import dbConnection from "../../lib/dbConnection";
 
+import { NextRequest } from "next/server";
 import errorHandler from "../ErrorHandelars";
 
 // import errorHandler from "../ErrorHandelars";
@@ -17,8 +18,8 @@ import errorHandler from "../ErrorHandelars";
 
 // export default catchAsync;
 
-export function catchAsync<T>(handler: (req: Request) => Promise<T>) {
-  return async (req: Request) => {
+export function catchAsync<T>(handler: (req: NextRequest) => Promise<T>) {
+  return async (req: NextRequest) => {
     try {
       return await handler(req);
     } catch (error) {

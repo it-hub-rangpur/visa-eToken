@@ -24,6 +24,8 @@ const Onprogress: React.FC<IProps> = ({ data }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  console.log("data", data?.length);
+
   return (
     <Grid container spacing={2}>
       {data?.map((item, index) => (

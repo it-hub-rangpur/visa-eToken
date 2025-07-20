@@ -13,6 +13,7 @@ export interface IApiReponse<T> {
   message?: string | null;
   meta?: IMeta;
   data?: T | null;
+  token?: string;
 }
 
 const sendResponse = <T>(

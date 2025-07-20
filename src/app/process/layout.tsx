@@ -1,5 +1,5 @@
 import Header from "@/components/Header";
-import PrivateLayout from "@/layouts/PaivateLayout";
+// import PrivateLayout from "@/layouts/PaivateLayout";
 import React from "react";
 
 export const metadata = {
@@ -9,11 +9,11 @@ export const metadata = {
 
 const ProcessLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <PrivateLayout>
+    <>
       <Header />
       {children}
-    </PrivateLayout>
+    </>
   );
 };
 
-export default ProcessLayout;
+export default ProcessLayout; // ProcessLayout;

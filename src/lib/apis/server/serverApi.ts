@@ -2,12 +2,12 @@ import { fetchBaseQuery } from "@reduxjs/toolkit/query";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { setLoggedInUser } from "./serverSlice";
 
-const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL as string;
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL as string;
 
 const serverApiSlice = createApi({
   reducerPath: "serverApiSlice",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${baseUrl}/api/v1`,
+    baseUrl: `${baseUrl}/api/v2`,
     prepareHeaders: (headers) => {
       headers.set("Content-Type", "application/json");
       const cookies = document.cookie.split("; ");
@@ -26,7 +26,7 @@ const serverApiSlice = createApi({
   endpoints: (builder) => ({
     getCaptcha: builder.mutation({
       query: () => ({
-        url: `/recaptcha-token/anti`,
+        url: `/get-captcha-token`,
         method: "GET",
         contentType: "application/json",
       }),
@@ -34,16 +34,17 @@ const serverApiSlice = createApi({
 
     userLogin: builder.mutation({
       query: (data) => ({
-        url: "/users/login",
+        url: "/login",
         method: "POST",
         body: data,
+        contentType: "application/json",
       }),
       invalidatesTags: ["user"],
     }),
 
     getLoginUser: builder.query({
       query: () => ({
-        url: "/users/me",
+        url: "/api/v1/get-login-info",
         method: "GET",
       }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {

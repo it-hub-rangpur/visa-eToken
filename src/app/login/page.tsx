@@ -28,7 +28,7 @@ const LoginPage = () => {
     try {
       const response = await login(values).unwrap();
       const token = response?.data?.token;
-      document.cookie = `token=${token}; path=/; expires=${new Date(
+      document.cookie = `accessToken=${token}; path=/; expires=${new Date(
         Date.now() + 1000 * 60 * 60 * 8
       ).toUTCString()}`;
       router.replace("/process");

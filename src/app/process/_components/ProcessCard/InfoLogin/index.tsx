@@ -161,8 +161,8 @@ const InfoLogin: React.FC<IProps> = ({
     <Box sx={{ display: "flex", justifyContent: "flexStart", gap: "10px" }}>
       <Box sx={{ width: "100%" }}>
         <Typography sx={{ fontSize: "12px", fontWeight: "bold" }}>
-          Mission: {getCenter(data?.center)}, {getVisaType(data?.visaType)} -{" "}
-          {data?.info?.length}
+          Mission: {getCenter(data?.center)?.c_name},{" "}
+          {getVisaType(data?.visaType)?.type_name} - {data?.info?.length}
         </Typography>
         <Typography sx={{ fontSize: "12px", fontWeight: "bold" }}>
           Med: {medInfo?.web_id},{" "}
