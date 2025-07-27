@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import { Field, FieldProps } from "formik";
 import React from "react";
-import theme from "../../../theme";
 
 interface SelectOptions {
   label: string;
@@ -60,7 +59,6 @@ const FormRadioField: React.FC<IRadio> = ({ name, label, options, inline }) => {
                         sx={{
                           fontSize: "14px",
                           fontWeight: 500,
-                          color: theme.colorConstants.darkGray,
                         }}
                       >
                         {item.label}

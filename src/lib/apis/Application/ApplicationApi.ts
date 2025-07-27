@@ -89,6 +89,15 @@ const ApplicationApi = baseApiSlice.injectEndpoints({
         body: info,
       }),
     }),
+
+    orderConfirm: builder.mutation({
+      query: (orderInfo) => ({
+        url: `/order-confirmations`,
+        method: "POST",
+        contentType: "application/json",
+        body: orderInfo,
+      }),
+    }),
   }),
 });
 
@@ -103,4 +112,5 @@ export const {
   useOtpVerifyMutation,
   useGetTimeSlotMutation,
   useBookSlotMutation,
+  useOrderConfirmMutation,
 } = ApplicationApi;

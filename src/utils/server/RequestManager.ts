@@ -72,7 +72,6 @@ export async function raceRequests(
       if (tracker) {
         tracker.isCompleted = completed;
         timeouts.forEach((timeout) => clearTimeout(timeout));
-        // Remove reject reference if it exists
         if (tracker.reject) {
           delete tracker.reject;
         }
@@ -81,6 +80,7 @@ export async function raceRequests(
         }
       }
     };
+
     const makeRequestWithRetry = async (
       controller: AbortController,
       attempt = 0
@@ -101,13 +101,14 @@ export async function raceRequests(
         signal: controller.signal,
       });
 
-      console.log(response?.status, "-", response?.statusText);
+      console.log(response?.status, "-", response?.statusText, "-", action);
 
       if (RETRY_STATUS_CODES.includes(response.status)) {
+        await new Promise((solve) => setTimeout(solve, 2000)); // Fixed 2-second delay
         console.log(
           `Retrying request (attempt ${attempt + 1}) for status ${
             response.status
-          }`
+          } after 2 seconds`
         );
         return makeRequestWithRetry(controller, attempt + 1);
       } else if (ERROR_STATUS_CODES.includes(response.status)) {
@@ -133,7 +134,6 @@ export async function raceRequests(
             hasSuccess = true;
             cleanup(true);
             resolve(response);
-            // Abort other requests
             controllers.forEach((c) => c !== controller && c.abort());
           } else if (response?.status === 429) {
             reject(new ApiError(429, "Too many requests"));
@@ -142,11 +142,12 @@ export async function raceRequests(
           console.error(`Request ${i} failed after retries:`, error);
         } finally {
           completedCount++;
-          // checkCompletion();
+          checkCompletion();
         }
       }, delay);
       timeouts.push(timeout);
     });
+
     const checkCompletion = () => {
       if (!hasSuccess && completedCount === concurrency) {
         cleanup(true);
@@ -155,6 +156,120 @@ export async function raceRequests(
     };
   });
 }
+
+// export async function raceRequests(
+//   payload: IPayload,
+//   concurrency: number = multipleCall,
+//   maxDelayMs: number = 9
+// ) {
+//   const { _id, action, cookies, method, info } = payload;
+//   const headers = createHeaders(cookies);
+
+//   const controllers = Array.from(
+//     { length: concurrency },
+//     () => new AbortController()
+//   );
+//   const timeouts: NodeJS.Timeout[] = [];
+
+//   return new Promise((resolve, reject) => {
+//     requestMap.set(_id, {
+//       isCompleted: false,
+//       controllers,
+//       timeouts,
+//       reject,
+//     });
+//     let hasSuccess = false;
+//     let completedCount = 0;
+//     const cleanup = (completed: boolean) => {
+//       const tracker = requestMap.get(_id);
+//       if (tracker) {
+//         tracker.isCompleted = completed;
+//         timeouts.forEach((timeout) => clearTimeout(timeout));
+//         // Remove reject reference if it exists
+//         if (tracker.reject) {
+//           delete tracker.reject;
+//         }
+//         if (completed) {
+//           requestMap.delete(_id);
+//         }
+//       }
+//     };
+//     const makeRequestWithRetry = async (
+//       controller: AbortController,
+//       attempt = 0
+//     ) => {
+//       if (hasSuccess || controller.signal.aborted) {
+//         return null;
+//       }
+
+//       const response = await fetch(url + action, {
+//         dispatcher: httpsAgent,
+//         method,
+//         headers,
+//         body:
+//           method !== "GET"
+//             ? new URLSearchParams(info as Record<string, string>)
+//             : undefined,
+//         redirect: "manual",
+//         signal: controller.signal,
+//       });
+
+//       console.log(response?.status, "-", response?.statusText, "-", action);
+
+//       if (RETRY_STATUS_CODES.includes(response.status)) {
+//         await new Promise((solve) => setTimeout(solve, 1000));
+//         console.log(
+//           `Retrying request (attempt ${attempt + 1}) for status ${
+//             response.status
+//           }`
+//         );
+
+//         return makeRequestWithRetry(controller, attempt + 1);
+//       } else if (ERROR_STATUS_CODES.includes(response.status)) {
+//         reject(new ApiError(429, "Too many requests"));
+//       }
+//       return response;
+//     };
+
+//     controllers.forEach((controller, i) => {
+//       const delay = i === 0 ? 0 : Math.floor(Math.random() * maxDelayMs);
+//       const timeout = setTimeout(async () => {
+//         if (hasSuccess || controller.signal.aborted) {
+//           completedCount++;
+//           checkCompletion();
+//           return;
+//         }
+//         try {
+//           const response = await makeRequestWithRetry(controller);
+//           if (
+//             SUCCESS_STATUS_CODES?.includes(response?.status as number) &&
+//             !hasSuccess
+//           ) {
+//             hasSuccess = true;
+//             cleanup(true);
+//             resolve(response);
+//             // Abort other requests
+//             controllers.forEach((c) => c !== controller && c.abort());
+//           } else if (response?.status === 429) {
+//             reject(new ApiError(429, "Too many requests"));
+//           }
+//         } catch (error) {
+//           console.error(`Request ${i} failed after retries:`, error);
+//         } finally {
+//           completedCount++;
+//           // checkCompletion();
+//         }
+//       }, delay);
+//       timeouts.push(timeout);
+//     });
+//     const checkCompletion = () => {
+//       if (!hasSuccess && completedCount === concurrency) {
+//         cleanup(true);
+//         reject(new Error("All requests failed after retries"));
+//       }
+//     };
+//   });
+// }
 
 export async function abortRequests(applicationId: string) {
   const tracker = requestMap.get(applicationId);

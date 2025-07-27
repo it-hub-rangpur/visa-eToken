@@ -5,7 +5,6 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { Field, FieldProps } from "formik";
 import dayjs from "dayjs";
-import theme from "../../../theme";
 
 interface IDate {
   name: string;
@@ -42,7 +41,7 @@ const FormDateField: React.FC<IDate> = ({ name, label, inline }) => {
                     height: "10px",
                     fontSize: { xs: "14px", md: "16px" },
                     fontWeight: 500,
-                    bgcolor: theme.colorConstants?.whitishGray,
+                    bgcolor: "#FFF",
                   },
                 }}
                 onChange={(date) => {

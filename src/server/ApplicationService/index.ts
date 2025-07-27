@@ -342,3 +342,24 @@ export const BookNow = async (payload: IPayload) => {
   }
   return info;
 };
+
+export const OrderConfirm = async (payload: IPayload) => {
+  const response = (await raceRequests(payload)) as Response;
+  const cookies = response?.headers?.getSetCookie();
+  const redirectPath = response?.headers?.get("Location");
+
+  const confirmRedirect = `https://payment.ivacbd.com/multi_payment/status/${payload?.info?.tran_id}`;
+
+  const info = {
+    success: redirectPath === confirmRedirect ? true : false,
+    action:
+      redirectPath === confirmRedirect
+        ? "Order-Confirm-Success"
+        : "Order-Confirm-Failed",
+    cookies,
+    order_id: payload?.info?.tran_id,
+    path: redirectPath,
+  };
+
+  return info;
+};

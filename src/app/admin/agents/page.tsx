@@ -9,6 +9,7 @@ import AllUsers from "./__components/AllUsers";
 const Agents = () => {
   const [value, setValue] = React.useState(0);
   const [applicationModalOpen, setApplicationModalOpen] = React.useState(false);
+  console.log("applicationModalOpen", applicationModalOpen);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);

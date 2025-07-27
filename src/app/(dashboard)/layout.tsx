@@ -25,6 +25,20 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       link: "/",
       subLink: [],
     },
+    {
+      label: "Ongoing Applications",
+      icon: "",
+      icon2: "",
+      link: "/ongoing-applications",
+      subLink: [],
+    },
+    {
+      label: "Process Dashboard",
+      icon: "",
+      icon2: "",
+      link: "/process",
+      subLink: [],
+    },
   ];
 
   const Main = styled("main")<{

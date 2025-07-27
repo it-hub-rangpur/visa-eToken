@@ -8,6 +8,7 @@ import { IProcessResponse } from "@/interfaces";
 import { getApplicationState } from "@/utils/localStorage";
 import ApplicationSection from "./ApplicationSection";
 import PaymentSection from "./PaymentSection";
+import OrderConfirmation from "./OrderConfirmation";
 
 interface IProps {
   data: IApplication;
@@ -25,6 +26,7 @@ const ProcessCard: React.FC<IProps> = ({ data }) => {
   const [applicationState, setApplicationState] =
     useState<IProcessResponse>(initialState);
   const [displayMessage, setDisplayMessage] = useState("Not started");
+  const [isShowConfirmContainer, setIsShowConfirmContainer] = useState(false);
 
   const otpSendRef = React.useRef<HTMLButtonElement>(null);
 
@@ -52,7 +54,6 @@ const ProcessCard: React.FC<IProps> = ({ data }) => {
         setApplicationState={setApplicationState}
         setDisplayMessage={setDisplayMessage}
       />
-
       <Box sx={{ mt: "5px" }}>
         <Typography
           sx={{
@@ -69,7 +70,14 @@ const ProcessCard: React.FC<IProps> = ({ data }) => {
         </Typography>
       </Box>
 
-      <Box sx={{ display: "flex" }}>
+      <Box
+        sx={{
+          display:
+            isShowConfirmContainer || data?.paymentStatus?.order_id
+              ? "none"
+              : "flex",
+        }}
+      >
         <ApplicationSection
           data={data}
           applicationState={applicationState}
@@ -85,6 +93,12 @@ const ProcessCard: React.FC<IProps> = ({ data }) => {
           otpSendRef={otpSendRef}
         />
       </Box>
+      <OrderConfirmation
+        data={data}
+        setDisplayMessage={setDisplayMessage}
+        isShowConfirmContainer={isShowConfirmContainer}
+        setIsShowConfirmContainer={setIsShowConfirmContainer}
+      />
     </Paper>
   );
 };

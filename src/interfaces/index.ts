@@ -20,7 +20,7 @@ export interface IProcessResponse {
   resend?: number;
   success?: boolean;
   slot_dates?: string[];
-  slot_times?: { hour: number; date: string }[];
+  slot_times?: { hour: number; date: string; availableSlot: number }[];
   url?: string;
 }
 

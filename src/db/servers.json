@@ -1,0 +1,12 @@
+[
+  {
+    "id": "SVR1",
+    "name": "Server 1 (Default)",
+    "ip": ""
+  },
+  {
+    "id": "SVR2",
+    "name": "Server 2 (Robost)",
+    "ip": "38.0.101.76"
+  }
+]

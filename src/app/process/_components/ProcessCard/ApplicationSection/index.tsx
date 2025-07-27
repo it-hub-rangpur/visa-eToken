@@ -181,10 +181,10 @@ const ApplicationSection: React.FC<IProps> = ({
           onClick={applicationInfo}
           size="small"
           color={
-            currentStep > 3
-              ? "success"
-              : applicationInfoLoading
+            applicationInfoLoading
               ? "warning"
+              : currentStep > 3
+              ? "success"
               : "primary"
           }
           variant="contained"

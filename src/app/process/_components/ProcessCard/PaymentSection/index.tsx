@@ -1,6 +1,7 @@
 "use client";
 import { IProcessResponse } from "@/interfaces";
 import {
+  useAbortCallMutation,
   useBookSlotMutation,
   useGetTimeSlotMutation,
   useOtpVerifyMutation,
@@ -33,6 +34,8 @@ const PaymentSection: React.FC<IProps> = ({
 
   const [paymentOtp, { isLoading: paymentOtpLoading }] =
     usePaymentOtpMutation();
+
+  const [abortCall] = useAbortCallMutation();
 
   const [otpVerify, { isLoading: otpVerifyLoading }] = useOtpVerifyMutation();
 
@@ -228,6 +231,21 @@ const PaymentSection: React.FC<IProps> = ({
     }
   };
 
+  const handleAbort = async () => {
+    setDisplayMessage("Call aborting...");
+    const info = {
+      _id: data?._id,
+      action: "abort",
+    };
+
+    try {
+      await abortCall(info).unwrap();
+      setDisplayMessage("Call aborted!");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleOpenURL = () => {
     setDisplayMessage("Payment URL Opening...");
     const url = applicationState?.url;
@@ -255,9 +273,10 @@ const PaymentSection: React.FC<IProps> = ({
     }) => {
       if (otp?.length === 6 && data?.phone === phone) {
         setOtp(otp); // Set the OTP state
+        handleAbort();
         setTimeout(() => {
           payOtpVerifyButtonRef?.current?.click();
-        }, 1000);
+        }, 1500);
       }
     };
 
@@ -267,6 +286,7 @@ const PaymentSection: React.FC<IProps> = ({
     return () => {
       SocketIO.off("pay-send-otp", handlePayOtpVefiry);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.phone]);
 
   const currentStep = getCurrentSession(
@@ -375,7 +395,15 @@ const PaymentSection: React.FC<IProps> = ({
                 width: "100%",
               }}
             >
-              {getTimeSlotLoading ? "Getting..." : "Time Slot"}
+              {getTimeSlotLoading
+                ? "Getting..."
+                : Array.isArray(applicationState?.slot_times) &&
+                  applicationState.slot_times.length > 0
+                ? `Slot - ${
+                    (applicationState.slot_times[0].availableSlot as number) ??
+                    0
+                  }`
+                : "Time Slot"}
             </Button>
 
             <Button

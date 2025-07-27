@@ -1,8 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import {
   Box,
-  Collapse,
   Drawer,
   IconButton,
   List,
@@ -13,9 +12,7 @@ import {
 } from "@mui/material";
 
 import { styled, useTheme } from "@mui/material/styles";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { IMenuProps } from "../../layout";
 import { Close, Logout } from "@mui/icons-material";
 import { useGlobalAppState } from "@/context/GlobalAppStateContext";
@@ -37,19 +34,10 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 
 const SideNav: React.FC<SideNavProps> = ({ setOpen, open, menuItems }) => {
   const { loggedInUser } = useGlobalAppState();
-
   const companyName = loggedInUser?.companyId?.companyName;
-
+  const router = useRouter();
   const theme = useTheme();
-  const [collapse, setCollapse] = useState<{ [index: number]: boolean }>({});
   const pathName = usePathname();
-
-  const handleClick = (index: number): void => {
-    setCollapse((prevCollapes) => ({
-      ...prevCollapes,
-      [index]: !prevCollapes[index],
-    }));
-  };
 
   return (
     <Drawer
@@ -106,135 +94,53 @@ const SideNav: React.FC<SideNavProps> = ({ setOpen, open, menuItems }) => {
         <List>
           {menuItems.map((menuItem, index) => (
             <React.Fragment key={index}>
-              <ListItem disablePadding>
-                {menuItem?.subLink?.length > 0 ? (
-                  <ListItemButton
-                    onClick={() => handleClick(index)}
-                    sx={{
-                      borderRadius: "10px",
-                      "&:hover": {
-                        backgroundColor: theme.palette.info.main,
-                      },
-                    }}
-                  >
-                    <ListItemIcon>
-                      {pathName.includes(menuItem?.link)
-                        ? menuItem.icon2
-                        : menuItem.icon}
-                    </ListItemIcon>
-                    <Box
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="center"
-                      sx={{ width: "100%", py: "5px", marginLeft: "-15px" }}
-                    >
-                      <Typography
-                        sx={{
-                          color: pathName.includes(menuItem?.link)
-                            ? "#3939CC"
-                            : "#3A326D",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {menuItem.label}
-                      </Typography>
-                      {menuItem?.subLink?.length > 0 &&
-                        (collapse[index] ? (
-                          <ExpandMore sx={{ color: "#3939CC" }} />
-                        ) : (
-                          <ExpandLess />
-                        ))}
-                    </Box>
-                  </ListItemButton>
-                ) : (
-                  <ListItemButton
-                    // onClick={() => {
-                    //   navigateWithScroll(menuItem?.link);
-                    //   setOpen(false);
-                    // }}
-                    sx={{
-                      borderRadius: "10px",
+              <ListItemButton
+                onClick={() => {
+                  router.push(menuItem?.link);
+                  setOpen(false);
+                }}
+                sx={{
+                  borderRadius: "10px",
 
-                      bgcolor:
-                        (menuItem?.link === "/home" && pathName === "/home") ||
-                        (menuItem?.link !== "/home" &&
+                  bgcolor:
+                    (menuItem?.link === "/" && pathName === "/") ||
+                    (menuItem?.link !== "/" &&
+                      pathName.startsWith(menuItem?.link))
+                      ? "#EBEBFF"
+                      : "transparent",
+                  "&:hover": {
+                    backgroundColor: "#EBEBFF",
+                  },
+                }}
+              >
+                <ListItemIcon>
+                  {(menuItem?.link === "/" && pathName === "/") ||
+                  (menuItem?.link !== "/" &&
+                    pathName.startsWith(menuItem?.link))
+                    ? menuItem?.icon2 ?? menuItem?.icon2
+                    : menuItem?.icon}
+                </ListItemIcon>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  sx={{ width: "100%", py: "5px", marginLeft: "-15px" }}
+                >
+                  <Typography
+                    sx={{
+                      color:
+                        (menuItem?.link === "/" && pathName === "/") ||
+                        (menuItem?.link !== "/" &&
                           pathName.startsWith(menuItem?.link))
-                          ? "#EBEBFF"
-                          : "transparent",
-                      "&:hover": {
-                        backgroundColor: theme.palette.info.main,
-                      },
+                          ? "#3939CC"
+                          : "#3A326D",
+                      fontWeight: menuItem.link === pathName ? 500 : 400,
                     }}
                   >
-                    <ListItemIcon>
-                      {(menuItem?.link === "/home" && pathName === "/home") ||
-                      (menuItem?.link !== "/home" &&
-                        pathName.startsWith(menuItem?.link))
-                        ? menuItem?.icon2 ?? menuItem?.icon2
-                        : menuItem?.icon}
-                    </ListItemIcon>
-                    <Box
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="center"
-                      sx={{ width: "100%", py: "5px", marginLeft: "-15px" }}
-                    >
-                      <Typography
-                        sx={{
-                          color:
-                            (menuItem?.link === "/home" &&
-                              pathName === "/home") ||
-                            (menuItem?.link !== "/home" &&
-                              pathName.startsWith(menuItem?.link))
-                              ? "#3939CC"
-                              : "#3A326D",
-                          fontWeight: menuItem.link === pathName ? 600 : 500,
-                        }}
-                      >
-                        {menuItem.label}
-                      </Typography>
-                    </Box>
-                  </ListItemButton>
-                )}
-              </ListItem>
-              {menuItem.subLink.length > 0 && (
-                <Collapse in={collapse[index]} timeout="auto" unmountOnExit>
-                  <List component="div" disablePadding>
-                    {menuItem.subLink.map((subItem, subIndex) => (
-                      <ListItem key={subIndex} disablePadding>
-                        <ListItemButton
-                          // onClick={() => {
-                          //   navigateWithScroll(subItem?.link);
-                          // }}
-                          sx={{
-                            pl: 6,
-                            borderRadius: "10px",
-                            backgroundColor:
-                              pathName === subItem?.link
-                                ? "#EBEBFF"
-                                : "transparent",
-                            "&:hover": {
-                              backgroundColor: theme.palette.info.main,
-                            },
-                          }}
-                        >
-                          <Typography
-                            sx={{
-                              color:
-                                pathName === subItem?.link
-                                  ? "#3939CC"
-                                  : "#3A326D",
-                              fontWeight: 500,
-                            }}
-                          >
-                            {subItem.label}
-                          </Typography>
-                        </ListItemButton>
-                      </ListItem>
-                    ))}
-                  </List>
-                </Collapse>
-              )}
+                    {menuItem.label}
+                  </Typography>
+                </Box>
+              </ListItemButton>
             </React.Fragment>
           ))}
         </List>
