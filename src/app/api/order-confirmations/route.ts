@@ -16,7 +16,7 @@ export const POST = catchAsync(async (req: Request): Promise<NextResponse> => {
     action: "/api/payment/appointment/process",
     cookies: requestBody?.state,
     method: "POST",
-    info: { ...requestBody, value_a: "BGDDV1A82625,BGDDV1A8BE25,BGDDV1A88A25" },
+    info: requestBody,
   };
 
   const response = await OrderConfirm(payload as IPayload);
